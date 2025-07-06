@@ -31,7 +31,7 @@ function CategoryMenu({ onSelect }) {
 
   if (loading) {
     return (
-      <div className="text-center py-4">
+      <div className="text-center py-3 md:py-4">
         <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
         <p className="mt-1 text-sm text-gray-600">Đang tải danh mục...</p>
       </div>
@@ -40,29 +40,53 @@ function CategoryMenu({ onSelect }) {
 
   if (error) {
     return (
-      <div className="text-center py-4">
+      <div className="text-center py-3 md:py-4">
         <p className="text-red-600 text-sm">Lỗi tải danh mục: {error}</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-wrap gap-2 my-4 justify-center">
-      <button
-        className="bg-green-600 text-white px-4 py-1 rounded-full shadow hover:bg-green-700 transition border border-green-700 font-semibold"
-        onClick={() => onSelect && onSelect(null)}
-      >
-        Tất cả
-      </button>
-      {categories.map(cat => (
+    <div className="my-3 md:my-4">
+      {/* Desktop view - centered */}
+      <div className="hidden md:flex flex-wrap gap-2 justify-center">
         <button
-          key={cat.id}
-          className="bg-red-100 text-red-600 px-4 py-1 rounded-full border border-red-300 font-semibold shadow hover:bg-red-200 hover:text-white hover:bg-red-500 transition"
-          onClick={() => onSelect && onSelect(cat.id)}
+          className="bg-green-600 text-white px-4 py-2 rounded-full shadow hover:bg-green-700 transition border border-green-700 font-semibold text-sm"
+          onClick={() => onSelect && onSelect(null)}
         >
-          {cat.name}
+          Tất cả
         </button>
-      ))}
+        {categories.map(cat => (
+          <button
+            key={cat.id}
+            className="bg-red-100 text-red-600 px-4 py-2 rounded-full border border-red-300 font-semibold shadow hover:bg-red-200 hover:text-white hover:bg-red-500 transition text-sm"
+            onClick={() => onSelect && onSelect(cat.id)}
+          >
+            {cat.name}
+          </button>
+        ))}
+      </div>
+
+      {/* Mobile/Tablet view - horizontal scroll */}
+      <div className="md:hidden">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          <button
+            className="bg-green-600 text-white px-3 py-2 rounded-full shadow hover:bg-green-700 transition border border-green-700 font-semibold text-sm whitespace-nowrap flex-shrink-0"
+            onClick={() => onSelect && onSelect(null)}
+          >
+            Tất cả
+          </button>
+          {categories.map(cat => (
+            <button
+              key={cat.id}
+              className="bg-red-100 text-red-600 px-3 py-2 rounded-full border border-red-300 font-semibold shadow hover:bg-red-200 hover:text-white hover:bg-red-500 transition text-sm whitespace-nowrap flex-shrink-0"
+              onClick={() => onSelect && onSelect(cat.id)}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
