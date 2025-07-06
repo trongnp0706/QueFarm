@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35931.197 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "quefarm.client", "quefarm.client\quefarm.client.esproj", "{CF82BA35-E17B-704B-A936-48F413796773}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueFarm.Server", "QueFarm.Server\QueFarm.Server.csproj", "{74BCE9C6-6744-4859-AE5E-FCCE799E6B66}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CF82BA35-E17B-704B-A936-48F413796773}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF82BA35-E17B-704B-A936-48F413796773}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF82BA35-E17B-704B-A936-48F413796773}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{CF82BA35-E17B-704B-A936-48F413796773}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF82BA35-E17B-704B-A936-48F413796773}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF82BA35-E17B-704B-A936-48F413796773}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{74BCE9C6-6744-4859-AE5E-FCCE799E6B66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74BCE9C6-6744-4859-AE5E-FCCE799E6B66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74BCE9C6-6744-4859-AE5E-FCCE799E6B66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74BCE9C6-6744-4859-AE5E-FCCE799E6B66}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D2C87B46-7437-41CB-AD3D-6D1BEA7F0828}
+	EndGlobalSection
+EndGlobal
