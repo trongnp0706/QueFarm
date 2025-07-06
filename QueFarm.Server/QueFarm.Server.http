@@ -1,6 +1,89 @@
-@QueFarm.Server_HostAddress = http://localhost:5160
+### Test API Endpoints
+### Backend API URL: https://localhost:53355 (SPA Proxy)
 
-GET {{QueFarm.Server_HostAddress}}/weatherforecast/
-Accept: application/json
+### 1. Get All Products
+GET https://localhost:53355/api/product
+Content-Type: application/json
 
-###
+### 2. Get Product by ID
+GET https://localhost:53355/api/product/1
+Content-Type: application/json
+
+### 3. Get All Categories
+GET https://localhost:53355/api/category
+Content-Type: application/json
+
+### 4. Admin Login
+POST https://localhost:53355/api/admin/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+### 5. Create Order (Customer - No Auth Required)
+POST https://localhost:53355/api/order
+Content-Type: application/json
+
+{
+  "customerName": "Nguyễn Văn A",
+  "phone": "0123456789",
+  "address": "123 Đường ABC, Quận 1, TP.HCM",
+  "totalAmount": 50000,
+  "orderItems": [
+    {
+      "productId": 1,
+      "quantity": 2,
+      "price": 25000
+    }
+  ]
+}
+
+### 6. Get All Orders (Admin - Requires Auth)
+GET https://localhost:53355/api/order
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+### 7. Create Product (Admin - Requires Auth)
+POST https://localhost:53355/api/product
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Rau muống",
+  "price": 20000,
+  "description": "Rau muống tươi ngon",
+  "imageUrl": "https://via.placeholder.com/300x200?text=Rau+Muong",
+  "rating": 4.3,
+  "categoryId": 1
+}
+
+### 8. Update Product (Admin - Requires Auth)
+PUT https://localhost:53355/api/product/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "Rau cải bó xôi (Cập nhật)",
+  "price": 30000,
+  "description": "Rau cải bó xôi tươi ngon - đã cập nhật",
+  "imageUrl": "https://via.placeholder.com/300x200?text=Rau+Cai+Bo+Xoi+Updated",
+  "rating": 4.7,
+  "categoryId": 1
+}
+
+### 9. Delete Product (Admin - Requires Auth)
+DELETE https://localhost:53355/api/product/6
+Authorization: Bearer {{authToken}}
+
+### 10. Create Category (Admin - Requires Auth)
+POST https://localhost:53355/api/category
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Trái cây",
+  "description": "Các loại trái cây tươi"
+}
