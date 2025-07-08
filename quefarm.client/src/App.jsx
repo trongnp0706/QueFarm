@@ -7,6 +7,7 @@ import { CartProvider } from './context/CartContext.jsx';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import ProductDetail from './features/product/ProductDetail';
+import CategoryPage from './pages/CategoryPage';
 import Cart from './features/cart/Cart';
 import Checkout from './features/cart/Checkout';
 import AdminLogin from './pages/LoginPage';
@@ -26,6 +27,7 @@ function App() {
                 <Routes>
                   <Route path="/" element={<HomePage />} />
                   <Route path="/homepage" element={<HomePage />} />
+                  <Route path="/category/:id" element={<><Breadcrumb /><CategoryPage /></>} />
                   <Route path="/product/:id" element={<><Breadcrumb /><ProductDetail /></>} />
                   <Route path="/cart" element={<><Breadcrumb /><Cart /></>} />
                   <Route path="/checkout" element={<><Breadcrumb /><Checkout /></>} />

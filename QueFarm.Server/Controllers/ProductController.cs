@@ -23,12 +23,18 @@ namespace QueFarm.Server.Controllers
 
         // GET: api/product
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] int? categoryId)
         {
-            var products = await _context.Products
+            IQueryable<Product> query = _context.Products
                 .Include(p => p.Category)
-                .Include(p => p.Images.OrderBy(img => img.Order))
-                .ToListAsync();
+                .Include(p => p.Images.OrderBy(img => img.Order));
+
+            if (categoryId.HasValue)
+            {
+                query = query.Where(p => p.CategoryId == categoryId.Value);
+            }
+
+            var products = await query.ToListAsync();
             return Ok(products);
         }
 
