@@ -24,6 +24,15 @@ namespace QueFarm.Server.Controllers
             return Ok(categories);
         }
 
+        // GET: api/category/{id}
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var category = await _context.Categories.FindAsync(id);
+            if (category == null) return NotFound();
+            return Ok(category);
+        }
+
         // POST: api/category (Admin)
         [HttpPost]
         [Authorize]
