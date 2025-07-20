@@ -1,68 +1,64 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { FaLeaf, FaList } from 'react-icons/fa';
 
 function CategoryMenu({ onSelect }) {
   const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [activeCategory, setActiveCategory] = useState(null);
+
+  // Mock data
+  const mockCategories = [
+    { id: 1, name: 'Đặc sản miền Bắc', slug: 'dac-san-mien-bac', count: 24 },
+    { id: 2, name: 'Đặc sản miền Trung', slug: 'dac-san-mien-trung', count: 18 },
+    { id: 3, name: 'Đặc sản miền Nam', slug: 'dac-san-mien-nam', count: 32 },
+    { id: 4, name: 'Lap xưởng tươi', slug: 'lap-xuong-tuoi', count: 12 },
+    { id: 5, name: 'Bánh kẹo truyền thống', slug: 'banh-keo-truyen-thong', count: 28 },
+    { id: 6, name: 'Đặc sản Tây Ninh', slug: 'dac-san-tay-ninh', count: 15 },
+    { id: 7, name: 'Combo quà tặng', slug: 'combo-qua-tang', count: 8 }
+  ];
 
   useEffect(() => {
-    setLoading(true);
-    setError(null);
-    
-    fetch('/api/category')
-      .then(res => {
-        console.log('Category response status:', res.status);
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        return res.json();
-      })
-      .then(data => {
-        console.log('Categories from API:', data);
-        setCategories(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching categories:', err);
-        setError(err.message);
-        setLoading(false);
-      });
+    // For demo purposes, using mock data
+    // In a real app, fetch from API
+    setCategories(mockCategories);
   }, []);
 
-  if (loading) {
-    return (
-      <div className="text-center py-4">
-        <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
-        <p className="mt-1 text-sm text-gray-600">Đang tải danh mục...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-4">
-        <p className="text-red-600 text-sm">Lỗi tải danh mục: {error}</p>
-      </div>
-    );
-  }
+  const handleCategoryClick = (categoryId) => {
+    setActiveCategory(categoryId);
+    if (onSelect) {
+      onSelect(categoryId);
+    }
+  };
 
   return (
-    <div className="flex flex-wrap gap-2 my-4 justify-center">
-      <button
-        className="bg-green-600 text-white px-4 py-1 rounded-full shadow hover:bg-green-700 transition border border-green-700 font-semibold"
-        onClick={() => onSelect && onSelect(null)}
-      >
-        Tất cả
-      </button>
-      {categories.map(cat => (
-        <button
-          key={cat.id}
-          className="bg-red-100 text-red-600 px-4 py-1 rounded-full border border-red-300 font-semibold shadow hover:bg-red-200 hover:text-white hover:bg-red-500 transition"
-          onClick={() => onSelect && onSelect(cat.id)}
-        >
-          {cat.name}
-        </button>
-      ))}
+    <div className="bg-white rounded-lg shadow-sm mb-6 overflow-hidden">
+      {/* Category Header */}
+      <div className="bg-green-700 text-white py-3 px-4">
+        <div className="flex items-center gap-2">
+          <FaList />
+          <span className="font-bold">DANH MỤC SẢN PHẨM</span>
+        </div>
+      </div>
+      
+      {/* Category List */}
+      <ul className="divide-y divide-gray-200">
+        {categories.map((category) => (
+          <li key={category.id}>
+            <Link 
+              to={`/category/${category.slug}`}
+              className={`flex items-center justify-between py-3 px-4 hover:bg-green-50 transition-colors
+                ${activeCategory === category.id ? 'bg-green-50 text-green-700 font-medium' : 'text-gray-700'}`}
+              onClick={() => handleCategoryClick(category.id)}
+            >
+              <div className="flex items-center">
+                <FaLeaf className={`mr-3 ${activeCategory === category.id ? 'text-green-600' : 'text-green-400'}`} />
+                <span>{category.name}</span>
+              </div>
+              <span className="text-xs bg-gray-100 px-2 py-1 rounded-full">{category.count}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
