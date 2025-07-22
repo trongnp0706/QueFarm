@@ -12,7 +12,7 @@ using QueFarm.Server.Data;
 namespace QueFarm.Server.Migrations
 {
     [DbContext(typeof(QueFarmDbContext))]
-    [Migration("20250706064139_InitialCreate")]
+    [Migration("20250722031400_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -25,7 +25,7 @@ namespace QueFarm.Server.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("QueFarm.Server.Models.AdminUser", b =>
+            modelBuilder.Entity("QueFarm.Server.Core.Domain.Entities.AdminUser", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -37,13 +37,20 @@ namespace QueFarm.Server.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FullName")
+                    b.Property<string>("FirstName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastLogin")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -51,15 +58,14 @@ namespace QueFarm.Server.Migrations
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.ToTable("AdminUsers");
                 });
 
-            modelBuilder.Entity("QueFarm.Server.Models.Category", b =>
+            modelBuilder.Entity("QueFarm.Server.Core.Domain.Entities.Category", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -67,20 +73,35 @@ namespace QueFarm.Server.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("QueFarm.Server.Models.Order", b =>
+            modelBuilder.Entity("QueFarm.Server.Core.Domain.Entities.Order", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -90,21 +111,24 @@ namespace QueFarm.Server.Migrations
 
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Phone")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -118,13 +142,16 @@ namespace QueFarm.Server.Migrations
                     b.ToTable("Orders");
                 });
 
-            modelBuilder.Entity("QueFarm.Server.Models.OrderItem", b =>
+            modelBuilder.Entity("QueFarm.Server.Core.Domain.Entities.OrderItem", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
@@ -135,8 +162,15 @@ namespace QueFarm.Server.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -147,7 +181,7 @@ namespace QueFarm.Server.Migrations
                     b.ToTable("OrderItems");
                 });
 
-            modelBuilder.Entity("QueFarm.Server.Models.Product", b =>
+            modelBuilder.Entity("QueFarm.Server.Core.Domain.Entities.Product", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -155,25 +189,54 @@ namespace QueFarm.Server.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.PrimitiveCollection<string>("AdditionalImages")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("DiscountPercentage")
+                        .HasColumnType("int");
+
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Origin")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("OriginalPrice")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("Rating")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(3,1)");
+
+                    b.Property<string>("Region")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("StockQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Weight")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -182,15 +245,15 @@ namespace QueFarm.Server.Migrations
                     b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("QueFarm.Server.Models.OrderItem", b =>
+            modelBuilder.Entity("QueFarm.Server.Core.Domain.Entities.OrderItem", b =>
                 {
-                    b.HasOne("QueFarm.Server.Models.Order", "Order")
+                    b.HasOne("QueFarm.Server.Core.Domain.Entities.Order", "Order")
                         .WithMany("OrderItems")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("QueFarm.Server.Models.Product", "Product")
+                    b.HasOne("QueFarm.Server.Core.Domain.Entities.Product", "Product")
                         .WithMany("OrderItems")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -201,9 +264,9 @@ namespace QueFarm.Server.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("QueFarm.Server.Models.Product", b =>
+            modelBuilder.Entity("QueFarm.Server.Core.Domain.Entities.Product", b =>
                 {
-                    b.HasOne("QueFarm.Server.Models.Category", "Category")
+                    b.HasOne("QueFarm.Server.Core.Domain.Entities.Category", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -212,17 +275,17 @@ namespace QueFarm.Server.Migrations
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("QueFarm.Server.Models.Category", b =>
+            modelBuilder.Entity("QueFarm.Server.Core.Domain.Entities.Category", b =>
                 {
                     b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("QueFarm.Server.Models.Order", b =>
+            modelBuilder.Entity("QueFarm.Server.Core.Domain.Entities.Order", b =>
                 {
                     b.Navigation("OrderItems");
                 });
 
-            modelBuilder.Entity("QueFarm.Server.Models.Product", b =>
+            modelBuilder.Entity("QueFarm.Server.Core.Domain.Entities.Product", b =>
                 {
                     b.Navigation("OrderItems");
                 });

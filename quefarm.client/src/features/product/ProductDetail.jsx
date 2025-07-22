@@ -2,6 +2,7 @@ import { useParams } from 'react-router-dom';
 import { useEffect, useState, useContext } from 'react';
 import { FaStar, FaShoppingCart, FaMinus, FaPlus } from 'react-icons/fa';
 import { CartContext } from '../../context/CartContext';
+import { getProductById } from '../../services/productService';
 
 function ProductDetail() {
   const { id } = useParams();
@@ -10,36 +11,45 @@ function ProductDetail() {
   const [error] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const { addToCart } = useContext(CartContext);
-  
-  // For demo purposes - should be fetched from API
-  const mockProduct = {
-    id: parseInt(id),
-    name: "Lạp xưởng tươi bò _ Gói 500gr",
-    price: 124500,
-    originalPrice: 149400,
-    discount: 17,
-    imageUrl: "https://via.placeholder.com/500x500?text=Product",
-    description: "Lạp xưởng tươi bò 500gr là sản phẩm đặc sản được chế biến từ thịt bò tươi ngon, không chất bảo quản, đảm bảo vệ sinh an toàn thực phẩm. Sản phẩm có hương vị thơm ngon, đặc trưng, phù hợp cho các bữa ăn gia đình hoặc làm quà biếu tặng.",
-    rating: 4.8,
-    region: "Miền Nam",
-    weight: "500gr",
-    origin: "Long An",
-    features: [
-      "Thịt bò tươi ngon, không chất bảo quản",
-      "Đóng gói vệ sinh, bảo quản kỹ lưỡng",
-      "Hương vị đặc trưng miền Nam"
-    ],
-    relatedProducts: [
-      { id: 101, name: "Lạp xưởng tươi bò _ Gói 250gr", price: 62200, imageUrl: "https://via.placeholder.com/200x200?text=Product" },
-      { id: 102, name: "Lạp xưởng tươi tôm_ Gói 500gr", price: 138500, imageUrl: "https://via.placeholder.com/200x200?text=Product" }
-    ]
-  };
 
   useEffect(() => {
-    // For demo, using mock data
-    // In real app, fetch from API
-    setProduct(mockProduct);
-    setLoading(false);
+    const fetchProduct = async () => {
+      setLoading(true);
+      try {
+        const productData = await getProductById(id);
+        setProduct(productData);
+      } catch (error) {
+        console.error('Error fetching product:', error);
+        
+        // Fallback to mock data
+        const mockProduct = {
+          id: parseInt(id),
+          name: "Lạp xưởng tươi bò _ Gói 500gr",
+          price: 124500,
+          originalPrice: 149400,
+          discount: 17,
+          imageUrl: "https://via.placeholder.com/500x500?text=Product",
+          rating: 4.7,
+          description: "Lạp xưởng tươi bò được chế biến từ thịt bò tươi ngon, đảm bảo vệ sinh an toàn thực phẩm. Sản phẩm có hương vị đậm đà, thơm ngon đặc trưng của lạp xưởng truyền thống.",
+          features: [
+            "Thịt bò tươi ngon, được tuyển chọn kỹ lưỡng",
+            "Chế biến theo quy trình hiện đại, đảm bảo vệ sinh",
+            "Hương vị đậm đà, thơm ngon", 
+            "Bảo quản trong ngăn mát tủ lạnh",
+            "Hạn sử dụng: 30 ngày kể từ ngày sản xuất"
+          ],
+          relatedProducts: [
+            { id: 101, name: "Lạp xưởng tươi bò _ Gói 250gr", price: 62200, imageUrl: "https://via.placeholder.com/200x200?text=Product" },
+            { id: 102, name: "Lạp xưởng tươi tôm_ Gói 500gr", price: 138500, imageUrl: "https://via.placeholder.com/200x200?text=Product" }
+          ]
+        };
+        setProduct(mockProduct);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchProduct();
   }, [id]);
 
   const handleAddToCart = () => {

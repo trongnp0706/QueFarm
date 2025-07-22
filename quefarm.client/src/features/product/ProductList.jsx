@@ -3,6 +3,102 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { FaFilter, FaSort, FaThLarge, FaList } from 'react-icons/fa';
 import CategoryMenu from '../category/CategoryMenu';
 import ProductGrid from './ProductGrid';
+import { getAllProducts, getProductsByCategorySlug, searchProducts } from '../../services/productService';
+
+// Mock data for fallback
+const mockProducts = [
+  { 
+    id: 1, 
+    name: "Lạp xưởng tươi tôm_ Gói 250gr", 
+    price: 66700, 
+    originalPrice: 80040, 
+    discount: 17,
+    rating: 4.8,
+    categoryId: 4,
+    imageUrl: "https://via.placeholder.com/300x300?text=Product" 
+  },
+  { 
+    id: 2, 
+    name: "Lạp xưởng tươi tôm_ Gói 500gr", 
+    price: 138500, 
+    originalPrice: 166200, 
+    discount: 17,
+    rating: 4.5,
+    categoryId: 4,
+    imageUrl: "https://via.placeholder.com/300x300?text=Product" 
+  },
+  { 
+    id: 3, 
+    name: "Lạp xưởng tươi bò _ Gói 250gr", 
+    price: 62200, 
+    originalPrice: 74640, 
+    discount: 17,
+    rating: 4.9,
+    categoryId: 4, 
+    imageUrl: "https://via.placeholder.com/300x300?text=Product" 
+  },
+  { 
+    id: 4, 
+    name: "Lạp xưởng tươi bò _ Gói 500gr", 
+    price: 124500, 
+    originalPrice: 149400, 
+    discount: 17,
+    rating: 4.7,
+    categoryId: 4,
+    imageUrl: "https://via.placeholder.com/300x300?text=Product" 
+  },
+  { 
+    id: 5, 
+    name: "Bánh gai _ Gói 250gr", 
+    price: 36500, 
+    originalPrice: 40150, 
+    discount: 9,
+    rating: 4.6,
+    categoryId: 5,
+    imageUrl: "https://via.placeholder.com/300x300?text=Product" 
+  },
+  { 
+    id: 6, 
+    name: "Bánh đậu xanh nướng 250gr", 
+    price: 48000, 
+    originalPrice: 55200, 
+    discount: 13,
+    rating: 4.8,
+    categoryId: 5,
+    imageUrl: "https://via.placeholder.com/300x300?text=Product" 
+  },
+  { 
+    id: 7, 
+    name: "Bánh ống kem _ Gói 360gr", 
+    price: 45500, 
+    originalPrice: 50050, 
+    discount: 9,
+    rating: 4.4,
+    categoryId: 5,
+    imageUrl: "https://via.placeholder.com/300x300?text=Product" 
+  },
+  { 
+    id: 8, 
+    name: "Bánh kẹp mè _ Gói 200gr", 
+    price: 31500, 
+    originalPrice: 34650, 
+    discount: 9,
+    rating: 4.3,
+    categoryId: 5,
+    imageUrl: "https://via.placeholder.com/300x300?text=Product" 
+  }
+];
+
+// Mock categories for reference
+const mockCategoryMap = {
+  'dac-san-mien-bac': 1,
+  'dac-san-mien-trung': 2,
+  'dac-san-mien-nam': 3,
+  'lap-xuong-tuoi': 4,
+  'banh-keo-truyen-thong': 5,
+  'dac-san-tay-ninh': 6,
+  'combo-qua-tang': 7
+};
 
 function ProductList() {
   const { categorySlug } = useParams();
@@ -18,110 +114,60 @@ function ProductList() {
   // Search query from URL if present
   const query = searchParams.get('q') || '';
   
-  // Mock data for products
-  const mockProducts = [
-    { 
-      id: 1, 
-      name: "Lạp xưởng tươi tôm_ Gói 250gr", 
-      price: 66700, 
-      originalPrice: 80040, 
-      discount: 17,
-      rating: 4.8,
-      categoryId: 4,
-      imageUrl: "https://via.placeholder.com/300x300?text=Product" 
-    },
-    { 
-      id: 2, 
-      name: "Lạp xưởng tươi tôm_ Gói 500gr", 
-      price: 138500, 
-      originalPrice: 166200, 
-      discount: 17,
-      rating: 4.5,
-      categoryId: 4,
-      imageUrl: "https://via.placeholder.com/300x300?text=Product" 
-    },
-    { 
-      id: 3, 
-      name: "Lạp xưởng tươi bò _ Gói 250gr", 
-      price: 62200, 
-      originalPrice: 74640, 
-      discount: 17,
-      rating: 4.9,
-      categoryId: 4, 
-      imageUrl: "https://via.placeholder.com/300x300?text=Product" 
-    },
-    { 
-      id: 4, 
-      name: "Lạp xưởng tươi bò _ Gói 500gr", 
-      price: 124500, 
-      originalPrice: 149400, 
-      discount: 17,
-      rating: 4.7,
-      categoryId: 4,
-      imageUrl: "https://via.placeholder.com/300x300?text=Product" 
-    },
-    { 
-      id: 5, 
-      name: "Bánh gai _ Gói 250gr", 
-      price: 36500, 
-      originalPrice: 40150, 
-      discount: 9,
-      rating: 4.6,
-      categoryId: 5,
-      imageUrl: "https://via.placeholder.com/300x300?text=Product" 
-    },
-    { 
-      id: 6, 
-      name: "Bánh đậu xanh nướng 250gr", 
-      price: 48000, 
-      originalPrice: 55200, 
-      discount: 13,
-      rating: 4.8,
-      categoryId: 5,
-      imageUrl: "https://via.placeholder.com/300x300?text=Product" 
-    },
-    { 
-      id: 7, 
-      name: "Bánh ống kem _ Gói 360gr", 
-      price: 45500, 
-      originalPrice: 50050, 
-      discount: 9,
-      rating: 4.4,
-      categoryId: 5,
-      imageUrl: "https://via.placeholder.com/300x300?text=Product" 
-    },
-    { 
-      id: 8, 
-      name: "Bánh kẹp mè _ Gói 200gr", 
-      price: 31500, 
-      originalPrice: 34650, 
-      discount: 9,
-      rating: 4.3,
-      categoryId: 5,
-      imageUrl: "https://via.placeholder.com/300x300?text=Product" 
-    }
-  ];
-
-  // Mock categories for reference
-  const mockCategoryMap = {
-    'dac-san-mien-bac': 1,
-    'dac-san-mien-trung': 2,
-    'dac-san-mien-nam': 3,
-    'lap-xuong-tuoi': 4,
-    'banh-keo-truyen-thong': 5,
-    'dac-san-tay-ninh': 6,
-    'combo-qua-tang': 7
-  };
-  
   useEffect(() => {
-    // For demo purposes, using mock data
-    // In a real app, fetch from API based on category and filters
-    setLoading(true);
-    setError(null);
-    
-    try {
-      // Simulate API call
-      setTimeout(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        let productsData = [];
+        
+        if (categorySlug) {
+          // Fetch products by category slug
+          productsData = await getProductsByCategorySlug(categorySlug);
+        } else if (query) {
+          // Search products
+          productsData = await searchProducts(query);
+        } else {
+          // Get all products
+          const response = await getAllProducts(1, 50); // Get more products for filtering
+          productsData = response.items || [];
+        }
+        
+        // Apply client-side filtering and sorting
+        let filteredProducts = [...productsData];
+        
+        // Filter by price range
+        filteredProducts = filteredProducts.filter(p => 
+          p.price >= priceRange[0] && p.price <= priceRange[1]
+        );
+        
+        // Sort products
+        switch (sortBy) {
+          case 'price-asc':
+            filteredProducts.sort((a, b) => a.price - b.price);
+            break;
+          case 'price-desc':
+            filteredProducts.sort((a, b) => b.price - a.price);
+            break;
+          case 'name':
+            filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
+            break;
+          case 'rating':
+            filteredProducts.sort((a, b) => b.rating - a.rating);
+            break;
+          case 'popularity':
+          default:
+            // Default sorting (by popularity)
+            break;
+        }
+        
+        setProducts(filteredProducts);
+      } catch (err) {
+        console.error('Error fetching products:', err);
+        setError('Không thể tải danh sách sản phẩm. Vui lòng thử lại sau.');
+        
+        // Fallback to mock data if API fails
         let filteredProducts = [...mockProducts];
         
         // Filter by category if categorySlug is provided
@@ -165,12 +211,12 @@ function ProductList() {
         }
         
         setProducts(filteredProducts);
+      } finally {
         setLoading(false);
-      }, 500);
-    } catch (err) {
-      setError(err.message);
-      setLoading(false);
-    }
+      }
+    };
+    
+    fetchProducts();
   }, [categorySlug, query, sortBy, priceRange]);
 
   const handleCategorySelect = (categoryId) => {

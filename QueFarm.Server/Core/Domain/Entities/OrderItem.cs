@@ -10,5 +10,9 @@ namespace QueFarm.Server.Core.Domain.Entities
         public decimal Price { get; set; }
         public int Quantity { get; set; }
         public decimal Subtotal { get; set; }
+        
+        // Navigation properties
+        public Order? Order { get; set; }
+        public Product? Product { get; set; }
     }
 } 

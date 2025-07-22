@@ -9,6 +9,8 @@ namespace QueFarm.Server.Core.Domain.Entities
         public int? DiscountPercentage { get; set; }
         public string? Description { get; set; }
         public string? ImageUrl { get; set; }
+        public List<string>? AdditionalImages { get; set; }
+        public int StockQuantity { get; set; } = 0;
         public decimal Rating { get; set; } = 0;
         public int CategoryId { get; set; }
         public string? Origin { get; set; }
@@ -17,5 +19,9 @@ namespace QueFarm.Server.Core.Domain.Entities
         public bool IsActive { get; set; } = true;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
+        
+        // Navigation properties
+        public Category? Category { get; set; }
+        public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
 } 

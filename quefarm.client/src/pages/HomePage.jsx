@@ -3,6 +3,7 @@ import ProductGrid from '../features/product/ProductGrid';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FiArrowRight, FiArrowLeft } from 'react-icons/fi';
+import { getFeaturedProducts, getAllProducts } from '../services/productService';
 
 function ProductSection({ title, products, viewAllLink }) {
   return (
@@ -149,43 +150,10 @@ function HomePage() {
   const [southProducts, setSouthProducts] = useState([]);
   const [centralProducts, setCentralProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error] = useState(null);
+  const [error, setError] = useState(null);
 
   // Mock data for development
-  const mockProducts = [
-    { 
-      id: 1, 
-      name: "Lạp xưởng tươi tôm_ Gói 250gr", 
-      price: 66700, 
-      originalPrice: 80040, 
-      discount: 17, 
-      imageUrl: "https://via.placeholder.com/300x300?text=Product" 
-    },
-    { 
-      id: 2, 
-      name: "Lạp xưởng tươi tôm_ Gói 500gr", 
-      price: 138500, 
-      originalPrice: 166200, 
-      discount: 17, 
-      imageUrl: "https://via.placeholder.com/300x300?text=Product" 
-    },
-    { 
-      id: 3, 
-      name: "Lạp xưởng tươi bò _ Gói 250gr", 
-      price: 62200, 
-      originalPrice: 74640, 
-      discount: 17, 
-      imageUrl: "https://via.placeholder.com/300x300?text=Product" 
-    },
-    { 
-      id: 4, 
-      name: "Lạp xưởng tươi bò _ Gói 500gr", 
-      price: 124500, 
-      originalPrice: 149400, 
-      discount: 17, 
-      imageUrl: "https://via.placeholder.com/300x300?text=Product" 
-    }
-  ];
+ 
 
   const mockNews = [
     {
@@ -212,13 +180,72 @@ function HomePage() {
   ];
 
   useEffect(() => {
-    // In a real app, we would fetch data from the API
-    // For now, using mock data
-    setNewProducts(mockProducts);
-    setBestSellers(mockProducts);
-    setSouthProducts(mockProducts);
-    setCentralProducts(mockProducts);
-    setLoading(false);
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch featured products
+        const featuredProducts = await getFeaturedProducts(8);
+        
+        // Fetch all products for other sections  
+        const allProductsResponse = await getAllProducts(1, 20);
+        const allProducts = allProductsResponse.items || [];
+        
+        setNewProducts(featuredProducts.slice(0, 4));
+        setBestSellers(featuredProducts);
+        setSouthProducts(allProducts.slice(0, 4));
+        setCentralProducts(allProducts.slice(4, 8));
+        
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        setError('Không thể tải sản phẩm');
+        
+        // Fallback to mock data
+        const mockProducts = [
+          { 
+            id: 1, 
+            name: "Lạp xưởng tươi tôm_ Gói 250gr", 
+            price: 66700, 
+            originalPrice: 80040, 
+            discount: 17, 
+            imageUrl: "https://via.placeholder.com/300x300?text=Product" 
+          },
+          { 
+            id: 2, 
+            name: "Lạp xưởng tươi tôm_ Gói 500gr", 
+            price: 138500, 
+            originalPrice: 166200, 
+            discount: 17, 
+            imageUrl: "https://via.placeholder.com/300x300?text=Product" 
+          },
+          { 
+            id: 3, 
+            name: "Lạp xưởng tươi bò _ Gói 250gr", 
+            price: 62200, 
+            originalPrice: 74640, 
+            discount: 17, 
+            imageUrl: "https://via.placeholder.com/300x300?text=Product" 
+          },
+          { 
+            id: 4, 
+            name: "Lạp xưởng tươi bò _ Gói 500gr", 
+            price: 124500, 
+            originalPrice: 149400, 
+            discount: 17, 
+            imageUrl: "https://via.placeholder.com/300x300?text=Product" 
+          }
+        ];
+        
+        setNewProducts(mockProducts);
+        setBestSellers(mockProducts);
+        setSouthProducts(mockProducts);
+        setCentralProducts(mockProducts);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchProducts();
   }, []);
 
   if (loading) return (

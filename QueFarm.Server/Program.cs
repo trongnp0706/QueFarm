@@ -75,7 +75,7 @@ builder.Services.AddAuthentication(options =>
 var app = builder.Build();
 
 app.UseDefaultFiles();
-app.UseStaticFiles();
+app.UseStaticFiles(); // Serve static files from wwwroot
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -104,7 +104,7 @@ using (var scope = app.Services.CreateScope())
         var context = services.GetRequiredService<QueFarmDbContext>();
         context.Database.Migrate();
         // Initialize database with seed data
-        // DbInitializer.Initialize(context);
+        DbInitializer.Initialize(context);
     }
     catch (Exception ex)
     {

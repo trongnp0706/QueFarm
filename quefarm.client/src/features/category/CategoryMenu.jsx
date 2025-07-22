@@ -1,26 +1,35 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaLeaf, FaList } from 'react-icons/fa';
+import categoryService from '../../services/categoryService';
 
 function CategoryMenu({ onSelect }) {
   const [categories, setCategories] = useState([]);
   const [activeCategory, setActiveCategory] = useState(null);
 
-  // Mock data
-  const mockCategories = [
-    { id: 1, name: 'Đặc sản miền Bắc', slug: 'dac-san-mien-bac', count: 24 },
-    { id: 2, name: 'Đặc sản miền Trung', slug: 'dac-san-mien-trung', count: 18 },
-    { id: 3, name: 'Đặc sản miền Nam', slug: 'dac-san-mien-nam', count: 32 },
-    { id: 4, name: 'Lap xưởng tươi', slug: 'lap-xuong-tuoi', count: 12 },
-    { id: 5, name: 'Bánh kẹo truyền thống', slug: 'banh-keo-truyen-thong', count: 28 },
-    { id: 6, name: 'Đặc sản Tây Ninh', slug: 'dac-san-tay-ninh', count: 15 },
-    { id: 7, name: 'Combo quà tặng', slug: 'combo-qua-tang', count: 8 }
-  ];
-
   useEffect(() => {
-    // For demo purposes, using mock data
-    // In a real app, fetch from API
-    setCategories(mockCategories);
+    const fetchCategories = async () => {
+      try {
+        const categoriesData = await categoryService.getAllCategories();
+        setCategories(categoriesData);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        
+        // Fallback to mock data if API fails
+        const mockCategories = [
+          { id: 1, name: 'Đặc sản miền Bắc', slug: 'dac-san-mien-bac', count: 24 },
+          { id: 2, name: 'Đặc sản miền Trung', slug: 'dac-san-mien-trung', count: 18 },
+          { id: 3, name: 'Đặc sản miền Nam', slug: 'dac-san-mien-nam', count: 32 },
+          { id: 4, name: 'Lap xưởng tươi', slug: 'lap-xuong-tuoi', count: 12 },
+          { id: 5, name: 'Bánh kẹo truyền thống', slug: 'banh-keo-truyen-thong', count: 28 },
+          { id: 6, name: 'Đặc sản Tây Ninh', slug: 'dac-san-tay-ninh', count: 15 },
+          { id: 7, name: 'Combo quà tặng', slug: 'combo-qua-tang', count: 8 }
+        ];
+        setCategories(mockCategories);
+      }
+    };
+    
+    fetchCategories();
   }, []);
 
   const handleCategoryClick = (categoryId) => {
