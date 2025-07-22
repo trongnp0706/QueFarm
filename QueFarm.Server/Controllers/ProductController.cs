@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+<<<<<<< HEAD
 using Microsoft.EntityFrameworkCore;
 using QueFarm.Server.Data;
 using QueFarm.Server.Models;
@@ -8,6 +10,11 @@ using System.IO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+=======
+using QueFarm.Server.Core.DTOs;
+using QueFarm.Server.Core.Services;
+using System.ComponentModel.DataAnnotations;
+>>>>>>> dev-base
 
 namespace QueFarm.Server.Controllers
 {
@@ -15,14 +22,16 @@ namespace QueFarm.Server.Controllers
     [Route("api/[controller]")]
     public class ProductController : ControllerBase
     {
-        private readonly QueFarmDbContext _context;
-        public ProductController(QueFarmDbContext context)
+        private readonly IProductService _productService;
+
+        public ProductController(IProductService productService)
         {
-            _context = context;
+            _productService = productService;
         }
 
         // GET: api/product
         [HttpGet]
+<<<<<<< HEAD
         public async Task<IActionResult> GetAll([FromQuery] int? categoryId)
         {
             IQueryable<Product> query = _context.Products
@@ -35,23 +44,77 @@ namespace QueFarm.Server.Controllers
             }
 
             var products = await query.ToListAsync();
+=======
+        public async Task<IActionResult> GetAll(
+            [FromQuery] int pageNumber = 1, 
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? search = null)
+        {
+            if (pageNumber < 1) 
+                return BadRequest("Page number must be greater than 0");
+                
+            if (pageSize < 1 || pageSize > 50)
+                return BadRequest("Page size must be between 1 and 50");
+                
+            var pagedProducts = await _productService.GetAllProductsAsync(pageNumber, pageSize, search);
+            return Ok(pagedProducts);
+        }
+
+        // GET: api/product/featured/{count}
+        [HttpGet("featured/{count:int}")]
+        public async Task<IActionResult> GetFeatured(int count)
+        {
+            var products = await _productService.GetFeaturedProductsAsync(count);
+>>>>>>> dev-base
             return Ok(products);
         }
 
         // GET: api/product/{id}
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
+<<<<<<< HEAD
             var product = await _context.Products
                 .Include(p => p.Category)
                 .Include(p => p.Images.OrderBy(img => img.Order))
                 .FirstOrDefaultAsync(p => p.Id == id);
+=======
+            var product = await _productService.GetProductByIdAsync(id);
+>>>>>>> dev-base
             if (product == null) return NotFound();
             return Ok(product);
         }
 
+        // GET: api/product/category/{categoryId}
+        [HttpGet("category/{categoryId:int}")]
+        public async Task<IActionResult> GetByCategory(int categoryId)
+        {
+            var products = await _productService.GetProductsByCategoryAsync(categoryId);
+            return Ok(products);
+        }
+
+        // GET: api/product/category-slug/{slug}
+        [HttpGet("category-slug/{slug}")]
+        public async Task<IActionResult> GetByCategorySlug(string slug)
+        {
+            var products = await _productService.GetProductsByCategorySlugAsync(slug);
+            return Ok(products);
+        }
+
+        // GET: api/product/search
+        [HttpGet("search")]
+        public async Task<IActionResult> Search([FromQuery] string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return BadRequest("Search query cannot be empty");
+
+            var products = await _productService.SearchProductsAsync(query);
+            return Ok(products);
+        }
+
         // POST: api/product (Admin)
         [HttpPost]
+<<<<<<< HEAD
         [Authorize]
         public async Task<IActionResult> Create([FromForm] string name, [FromForm] decimal price, [FromForm] string? description, [FromForm] decimal rating, [FromForm] int categoryId, [FromForm] List<IFormFile>? images, [FromForm] List<int>? imageOrders)
         {
@@ -186,18 +249,83 @@ namespace QueFarm.Server.Controllers
             await _context.SaveChangesAsync();
             var result = await _context.Products.Include(p => p.Images.OrderBy(img => img.Order)).FirstOrDefaultAsync(p => p.Id == product.Id);
             return Ok(result);
+=======
+        // [Authorize] // Temporarily disabled for testing
+        public async Task<IActionResult> Create([FromForm] CreateProductDto productDto, [FromForm] IFormFile? mainImage, [FromForm] List<IFormFile>? additionalImages)
+        {
+            try
+            {
+                // Validate product data
+                if (string.IsNullOrWhiteSpace(productDto.Name))
+                    return BadRequest("Product name is required");
+                    
+                if (productDto.Price <= 0)
+                    return BadRequest("Price must be greater than 0");
+                    
+                if (productDto.CategoryId <= 0)
+                    return BadRequest("Valid category ID is required");
+                
+                var product = await _productService.CreateProductAsync(productDto, mainImage, additionalImages);
+            return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // PUT: api/product/{id} (Admin)
+        [HttpPut("{id:int}")]
+        // [Authorize] // Temporarily disabled for testing
+        public async Task<IActionResult> Update(int id, [FromForm] UpdateProductDto productDto, [FromForm] IFormFile? mainImage, [FromForm] List<IFormFile>? additionalImages)
+        {
+            if (id != productDto.Id) 
+                return BadRequest("ID mismatch");
+
+            try
+            {
+                // Validate product data
+                if (string.IsNullOrWhiteSpace(productDto.Name))
+                    return BadRequest("Product name is required");
+                    
+                if (productDto.Price <= 0)
+                    return BadRequest("Price must be greater than 0");
+                    
+                if (productDto.CategoryId <= 0)
+                    return BadRequest("Valid category ID is required");
+                
+                var product = await _productService.UpdateProductAsync(productDto, mainImage, additionalImages);
+                return Ok(product);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+>>>>>>> dev-base
         }
 
         // DELETE: api/product/{id} (Admin)
-        [HttpDelete("{id}")]
-        [Authorize]
+        [HttpDelete("{id:int}")]
+        // [Authorize] // Temporarily disabled for testing
         public async Task<IActionResult> Delete(int id)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null) return NotFound();
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
-            return NoContent();
+            try
+            {
+                await _productService.DeleteProductAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
     }
 } 

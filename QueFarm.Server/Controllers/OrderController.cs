@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QueFarm.Server.Data;
-using QueFarm.Server.Models;
+using QueFarm.Server.Core.Domain.Entities;
 
 namespace QueFarm.Server.Controllers
 {
@@ -21,7 +21,7 @@ namespace QueFarm.Server.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Create(Order order)
         {
-            order.CreatedAt = DateTime.UtcNow;
+            order.OrderDate = DateTime.UtcNow;
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
             return Ok(order);
