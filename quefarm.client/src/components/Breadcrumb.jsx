@@ -1,5 +1,7 @@
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { Breadcrumb as AntBreadcrumb } from 'antd';
+import { HomeOutlined } from '@ant-design/icons';
 
 function Breadcrumb() {
   const location = useLocation();
@@ -18,20 +20,29 @@ function Breadcrumb() {
       setLoading(true);
       fetch(`/api/product/${params.id}`)
         .then(res => res.json())
-        .then(data => {
+        .then(async data => {
           setProduct(data);
-          // Lấy category
-          if (data && data.categoryId) {
-            fetch(`/api/category`)
-              .then(res => res.json())
-              .then(cats => {
-                const cat = cats.find(c => c.id === data.categoryId);
-                setCategory(cat);
-                setLoading(false);
-              });
+          // Lấy category từ product data nếu có
+          let cat = data.Category || data.category;
+          if (cat && (cat.Name || cat.name)) {
+            setCategory(cat);
+            setLoading(false);
+          } else if (data.categoryId) {
+            // Nếu không có, fetch category từ API
+            try {
+              const res = await fetch(`/api/category/${data.categoryId}`);
+              const catData = await res.json();
+              setCategory(catData);
+            } catch {
+              setCategory(null);
+            }
+            setLoading(false);
           } else {
             setLoading(false);
           }
+        })
+        .catch(() => {
+          setLoading(false);
         });
     }
     // Nếu là trang danh mục
@@ -42,33 +53,60 @@ function Breadcrumb() {
         .then(data => {
           setCategory(data);
           setLoading(false);
+        })
+        .catch(() => {
+          setLoading(false);
         });
     }
   }, [location.pathname, params.id]);
 
-  // Xây dựng breadcrumb
-  const crumbs = [
-    { name: 'Trang chủ', to: '/' }
+  // Xây dựng breadcrumb items cho Ant Design
+  const breadcrumbItems = [
+    {
+      title: (
+        <Link to="/" className="text-gray-600 hover:text-green-600">
+          <HomeOutlined /> Trang chủ
+        </Link>
+      ),
+    }
   ];
+
   if (category) {
-    crumbs.push({ name: category.name, to: `/category/${category.id}` });
+    const catName = category.Name || category.name;
+    const catId = category.Id || category.id;
+    breadcrumbItems.push({
+      title: location.pathname.startsWith('/category/') ? (
+        <span className="text-gray-800 font-medium">{catName}</span>
+      ) : (
+        <Link to={`/category/${catId}`} className="text-gray-600 hover:text-green-600">
+          {catName}
+        </Link>
+      ),
+    });
   }
+
   if (product) {
-    crumbs.push({ name: product.name });
+    breadcrumbItems.push({
+      title: <span className="text-gray-800 font-medium">{product.name}</span>,
+    });
   }
 
   return (
-    <div className="bg-gray-800 text-white py-2 px-4 text-center text-base font-medium">
-      {loading ? (
-        <span>Đang tải...</span>
-      ) : (
-        crumbs.map((c, i) => (
-          <span key={i}>
-            {c.to ? <Link to={c.to} className="hover:underline text-white/90">{c.name}</Link> : <span>{c.name}</span>}
-            {i < crumbs.length - 1 && ' » '}
-          </span>
-        ))
-      )}
+    <div className="bg-white border-b border-gray-200 py-3 px-4 md:px-6">
+      <div className="max-w-6xl mx-auto">
+        {loading ? (
+          <div className="flex items-center space-x-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+            <span className="text-gray-600 text-sm">Đang tải...</span>
+          </div>
+        ) : (
+          <AntBreadcrumb
+            separator=">"
+            items={breadcrumbItems}
+            className="text-sm"
+          />
+        )}
+      </div>
     </div>
   );
 }

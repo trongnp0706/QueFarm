@@ -87,3 +87,30 @@ Content-Type: application/json
   "name": "Trái cây",
   "description": "Các loại trái cây tươi"
 }
+
+### Test Category Endpoints
+GET https://localhost:53355/api/category
+
+###
+
+GET https://localhost:53355/api/category/1
+
+###
+
+### Test Product Endpoints
+GET https://localhost:53355/api/product
+
+###
+
+GET https://localhost:53355/api/product/1
+
+###
+
+### Test Product Filter by Category
+GET https://localhost:53355/api/product?categoryId=1
+
+###
+
+GET https://localhost:53355/api/product?categoryId=2
+
+###

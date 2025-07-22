@@ -26,5 +26,6 @@ namespace QueFarm.Server.Models
         // Navigation properties
         public Category Category { get; set; } = null!;
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+        public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
     }
 } 
