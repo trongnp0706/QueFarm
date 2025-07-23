@@ -25,12 +25,6 @@ namespace QueFarm.Server.Controllers
         }
 
         // GET: api/category/{id}
-<<<<<<< HEAD
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
-        {
-            var category = await _context.Categories.FindAsync(id);
-=======
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -44,7 +38,6 @@ namespace QueFarm.Server.Controllers
         public async Task<IActionResult> GetBySlug(string slug)
         {
             var category = await _categoryService.GetCategoryBySlugAsync(slug);
->>>>>>> dev-base
             if (category == null) return NotFound();
             return Ok(category);
         }
