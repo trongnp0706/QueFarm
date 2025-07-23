@@ -7,52 +7,23 @@ import { CartProvider } from './context/CartContext.jsx';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import ProductDetail from './features/product/ProductDetail';
-<<<<<<< HEAD
 import CategoryPage from './pages/CategoryPage';
+import ProductList from './features/product/ProductList';
 import Cart from './features/cart/Cart';
 import Checkout from './features/cart/Checkout';
 import AdminLogin from './pages/LoginPage';
 import AdminPage from './pages/AdminPage';
-=======
-import ProductList from './features/product/ProductList';
-import Cart from './features/cart/Cart';
-import Checkout from './features/cart/Checkout';
 import AdminLayout from './layouts/AdminLayout';
 import Dashboard from './features/admin/Dashboard';
 import ProductManagement from './features/admin/product/ProductManagement';
 import CategoryManagement from './features/admin/category/CategoryManagement';
 import TestAPI from './debug/TestAPI';
->>>>>>> dev-base
 
 function App() {
   return (
     <CartProvider>
       <Router>
         <Routes>
-<<<<<<< HEAD
-          {/* Layout cho user */}
-          <Route
-            path="/*"
-            element={
-              <>
-                <Header />
-                <Routes>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/homepage" element={<HomePage />} />
-                  <Route path="/category/:id" element={<><Breadcrumb /><CategoryPage /></>} />
-                  <Route path="/product/:id" element={<><Breadcrumb /><ProductDetail /></>} />
-                  <Route path="/cart" element={<><Breadcrumb /><Cart /></>} />
-                  <Route path="/checkout" element={<><Breadcrumb /><Checkout /></>} />
-                </Routes>
-                <Footer />
-                <FloatingActionButton />
-              </>
-            }
-          />
-          {/* Layout riêng cho admin */}
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/*" element={<AdminPage />} />
-=======
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Dashboard />} />
@@ -61,58 +32,94 @@ function App() {
             <Route path="*" element={<div>Page not found in Admin</div>} />
           </Route>
           
+          {/* Admin Login Route */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          
           {/* Public Routes */}
           <Route path="/" element={
             <>
               <Header />
               <HomePage />
               <Footer />
+              <FloatingActionButton />
+            </>
+          } />
+          <Route path="/homepage" element={
+            <>
+              <Header />
+              <HomePage />
+              <Footer />
+              <FloatingActionButton />
             </>
           } />
           <Route path="/products" element={
             <>
               <Header />
+              <Breadcrumb />
               <ProductList />
               <Footer />
+              <FloatingActionButton />
+            </>
+          } />
+          <Route path="/category/:id" element={
+            <>
+              <Header />
+              <Breadcrumb />
+              <CategoryPage />
+              <Footer />
+              <FloatingActionButton />
             </>
           } />
           <Route path="/category/:categorySlug" element={
             <>
               <Header />
+              <Breadcrumb />
               <ProductList />
               <Footer />
+              <FloatingActionButton />
             </>
           } />
           <Route path="/search" element={
             <>
               <Header />
+              <Breadcrumb />
               <ProductList />
               <Footer />
+              <FloatingActionButton />
             </>
           } />
           <Route path="/product/:id" element={
             <>
               <Header />
+              <Breadcrumb />
               <ProductDetail />
               <Footer />
+              <FloatingActionButton />
             </>
           } />
           <Route path="/cart" element={
             <>
               <Header />
+              <Breadcrumb />
               <Cart />
               <Footer />
+              <FloatingActionButton />
             </>
           } />
           <Route path="/checkout" element={
             <>
               <Header />
+              <Breadcrumb />
               <Checkout />
               <Footer />
+              <FloatingActionButton />
             </>
           } />
+          
           {/* Debug Route - Remove in production */}
           <Route path="/debug/api" element={<TestAPI />} />
+          
+          {/* Static Pages */}
           <Route path="/about" element={
             <>
               <Header />
@@ -121,6 +128,7 @@ function App() {
                 <p>Đang cập nhật...</p>
               </div>
               <Footer />
+              <FloatingActionButton />
             </>
           } />
           <Route path="/contact" element={
@@ -131,6 +139,7 @@ function App() {
                 <p>Đang cập nhật...</p>
               </div>
               <Footer />
+              <FloatingActionButton />
             </>
           } />
           <Route path="/promotion" element={
@@ -141,6 +150,7 @@ function App() {
                 <p>Đang cập nhật...</p>
               </div>
               <Footer />
+              <FloatingActionButton />
             </>
           } />
           <Route path="/help" element={
@@ -151,8 +161,11 @@ function App() {
                 <p>Đang cập nhật...</p>
               </div>
               <Footer />
+              <FloatingActionButton />
             </>
           } />
+          
+          {/* 404 Route */}
           <Route path="*" element={
             <>
               <Header />
@@ -161,9 +174,9 @@ function App() {
                 <p>Trang bạn đang tìm kiếm không tồn tại.</p>
               </div>
               <Footer />
+              <FloatingActionButton />
             </>
           } />
->>>>>>> dev-base
         </Routes>
       </Router>
     </CartProvider>
