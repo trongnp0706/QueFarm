@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using QueFarm.Server.Core.Domain.Entities;
 using QueFarm.Server.Core.Services;
 using QueFarm.Server.Data;
+using System.Text.RegularExpressions;
 
 namespace QueFarm.Server.Application.Services
 {
@@ -26,11 +27,17 @@ namespace QueFarm.Server.Application.Services
 
         public async Task<Category?> GetCategoryBySlugAsync(string slug)
         {
-            return await _context.Categories.FirstOrDefaultAsync(c => c.Name.ToLower().Replace(" ", "-") == slug.ToLower());
+            return await _context.Categories.FirstOrDefaultAsync(c => c.Slug == slug.ToLower());
         }
 
         public async Task<Category> CreateCategoryAsync(Category category)
         {
+            // Generate basic slug from name if needed
+            if (string.IsNullOrEmpty(category.Slug))
+            {
+                category.Slug = category.Name.ToLower().Replace(" ", "-");
+            }
+            
             _context.Categories.Add(category);
             await _context.SaveChangesAsync();
             return category;
@@ -38,9 +45,20 @@ namespace QueFarm.Server.Application.Services
 
         public async Task<Category> UpdateCategoryAsync(Category category)
         {
-            _context.Entry(category).State = EntityState.Modified;
+            var existingCategory = await _context.Categories.FindAsync(category.Id);
+            if (existingCategory == null)
+            {
+                throw new KeyNotFoundException($"Category with id {category.Id} not found");
+            }
+
+            // Update fields
+            existingCategory.Name = category.Name;
+            existingCategory.Description = category.Description;
+            existingCategory.Slug = category.Name.ToLower().Replace(" ", "-");
+
+            _context.Entry(existingCategory).State = EntityState.Modified;
             await _context.SaveChangesAsync();
-            return category;
+            return existingCategory;
         }
 
         public async Task DeleteCategoryAsync(int id)
