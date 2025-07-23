@@ -1,5 +1,11 @@
 import Banner from '../components/Banner';
+<<<<<<< HEAD
+import Breadcrumb from '../components/Breadcrumb';
 import ProductGrid from '../features/product/ProductGrid';
+import { Card, Typography, Spin, Alert, Button } from 'antd';
+=======
+import ProductGrid from '../features/product/ProductGrid';
+>>>>>>> dev-base
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FiArrowRight, FiArrowLeft } from 'react-icons/fi';
@@ -144,11 +150,17 @@ function NewsSection({ news }) {
   );
 }
 
+const { Title, Text } = Typography;
+
 function HomePage() {
+<<<<<<< HEAD
+  const [products, setProducts] = useState([]);
+=======
   const [newProducts, setNewProducts] = useState([]);
   const [bestSellers, setBestSellers] = useState([]);
   const [southProducts, setSouthProducts] = useState([]);
   const [centralProducts, setCentralProducts] = useState([]);
+>>>>>>> dev-base
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -179,6 +191,17 @@ function HomePage() {
   ];
 
   useEffect(() => {
+<<<<<<< HEAD
+    setLoading(true);
+    setError(null);
+    fetch('/api/product')
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        setProducts(data);
+=======
     const fetchProducts = async () => {
       try {
         setLoading(true);
@@ -240,6 +263,7 @@ function HomePage() {
         setSouthProducts(mockProducts);
         setCentralProducts(mockProducts);
       } finally {
+>>>>>>> dev-base
         setLoading(false);
       }
     };
@@ -247,6 +271,8 @@ function HomePage() {
     fetchProducts();
   }, []);
 
+<<<<<<< HEAD
+=======
   if (loading) return (
     <div className="text-center py-12">
       <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
@@ -266,13 +292,71 @@ function HomePage() {
     </div>
   );
 
+>>>>>>> dev-base
   return (
     <div>
       <Banner />
+<<<<<<< HEAD
+      <Breadcrumb />
+      <div className="container mx-auto px-4 py-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Loading state */}
+          {loading && (
+            <div className="flex justify-center items-center min-h-96">
+              <div className="text-center">
+                <Spin size="large" />
+                <div className="mt-4 text-gray-600">Đang tải sản phẩm...</div>
+              </div>
+            </div>
+          )}
+          {/* Error state */}
+          {error && (
+            <Alert
+              message="Lỗi tải sản phẩm"
+              description={error}
+              type="error"
+              showIcon
+              action={
+                <Button size="small" onClick={() => window.location.reload()}>
+                  Thử lại
+                </Button>
+              }
+              className="mb-6"
+            />
+          )}
+          {/* Products grid */}
+          {!loading && !error && (
+            <Card>
+              <div className="flex items-center justify-between mb-6">
+                <Title level={3} className="text-gray-800 mb-0">
+                  Sản phẩm nổi bật
+                </Title>
+                <Text className="text-gray-600">
+                  {products.length} sản phẩm
+                </Text>
+              </div>
+              {products.length > 0 ? (
+                <ProductGrid products={products} />
+              ) : (
+                <div className="text-center py-12">
+                  <div className="text-6xl mb-4">📦</div>
+                  <Title level={4} className="text-gray-600">
+                    Không tìm thấy sản phẩm
+                  </Title>
+                  <Text className="text-gray-500">
+                    Hãy thử lại sau hoặc liên hệ quản trị viên.
+                  </Text>
+                </div>
+              )}
+            </Card>
+          )}
+        </div>
+=======
       
       <div className="container mx-auto px-4 py-8">
         <ProductSection title="SẢN PHẨM MỚI" products={newProducts} viewAllLink="/products/new" />
         <ProductSection title="SẢN PHẨM BÁN CHẠY" products={bestSellers} viewAllLink="/products/bestsellers" />
+>>>>>>> dev-base
       </div>
       
       <TestimonialSection />

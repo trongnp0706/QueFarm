@@ -242,7 +242,36 @@ namespace QueFarm.Server.Migrations
                     b.ToTable("Products");
                 });
 
+<<<<<<< HEAD
+            modelBuilder.Entity("QueFarm.Server.Models.ProductImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ProductImages");
+                });
+
+            modelBuilder.Entity("QueFarm.Server.Models.OrderItem", b =>
+=======
             modelBuilder.Entity("QueFarm.Server.Core.Domain.Entities.OrderItem", b =>
+>>>>>>> dev-base
                 {
                     b.HasOne("QueFarm.Server.Core.Domain.Entities.Order", "Order")
                         .WithMany("OrderItems")
@@ -272,7 +301,22 @@ namespace QueFarm.Server.Migrations
                     b.Navigation("Category");
                 });
 
+<<<<<<< HEAD
+            modelBuilder.Entity("QueFarm.Server.Models.ProductImage", b =>
+                {
+                    b.HasOne("QueFarm.Server.Models.Product", "Product")
+                        .WithMany("Images")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("QueFarm.Server.Models.Category", b =>
+=======
             modelBuilder.Entity("QueFarm.Server.Core.Domain.Entities.Category", b =>
+>>>>>>> dev-base
                 {
                     b.Navigation("Products");
                 });
