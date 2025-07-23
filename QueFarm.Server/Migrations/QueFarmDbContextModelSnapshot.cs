@@ -186,7 +186,7 @@ namespace QueFarm.Server.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.PrimitiveCollection<string>("AdditionalImages")
+                    b.Property<string>("AdditionalImages")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("CategoryId")
@@ -284,8 +284,6 @@ namespace QueFarm.Server.Migrations
 
             modelBuilder.Entity("QueFarm.Server.Core.Domain.Entities.Product", b =>
                 {
-                    b.Navigation("Images");
-
                     b.Navigation("OrderItems");
                 });
 #pragma warning restore 612, 618

@@ -12,7 +12,7 @@ using QueFarm.Server.Data;
 namespace QueFarm.Server.Migrations
 {
     [DbContext(typeof(QueFarmDbContext))]
-    [Migration("20250722031400_InitialCreate")]
+    [Migration("20250723182136_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -189,7 +189,7 @@ namespace QueFarm.Server.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.PrimitiveCollection<string>("AdditionalImages")
+                    b.Property<string>("AdditionalImages")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("CategoryId")

@@ -12,7 +12,6 @@ namespace QueFarm.Server.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<AdminUser> AdminUsers { get; set; }
-        public DbSet<Models.ProductImage> ProductImages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -50,6 +49,14 @@ namespace QueFarm.Server.Data
                 .HasOne(p => p.Category)
                 .WithMany(c => c.Products)
                 .HasForeignKey(p => p.CategoryId);
+                
+            // Configure AdditionalImages as JSON (EF Core 7+)
+            modelBuilder.Entity<Product>()
+                .Property(e => e.AdditionalImages)
+                .HasConversion(
+                    v => v == null ? null : string.Join(';', v),
+                    v => v == null ? new List<string>() : v.Split(';', StringSplitOptions.RemoveEmptyEntries).ToList()
+                );
                 
             modelBuilder.Entity<OrderItem>()
                 .HasOne(oi => oi.Order)

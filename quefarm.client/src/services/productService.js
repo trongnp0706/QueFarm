@@ -10,48 +10,85 @@ axios.defaults.baseURL = API_BASE_URL;
 const API_URL = '/api/product';
 
 export const getAllProducts = async (pageNumber = 1, pageSize = 10, searchTerm = '') => {
-  let url = `${API_URL}?pageNumber=${pageNumber}&pageSize=${pageSize}`;
-  if (searchTerm) {
-    url += `&search=${encodeURIComponent(searchTerm)}`;
+  try {
+    let url = `${API_URL}?pageNumber=${pageNumber}&pageSize=${pageSize}`;
+    if (searchTerm) {
+      url += `&search=${encodeURIComponent(searchTerm)}`;
+    }
+    console.log('API URL:', url);
+    const response = await axios.get(url);
+    console.log('API Response:', response.data);
+    
+    // API returns data in this format (handle both Pascal and camelCase):
+    // { Products: [...], TotalItems: 10, PageNumber: 1, PageSize: 10 }
+    // or { products: [...], totalItems: 10, pageNumber: 1, pageSize: 10 }
+    return {
+      items: response.data.Products || response.data.products || [],
+      totalCount: response.data.TotalItems || response.data.totalItems || 0,
+      pageNumber: response.data.PageNumber || response.data.pageNumber || pageNumber,
+      pageSize: response.data.PageSize || response.data.pageSize || pageSize
+    };
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    // Return empty result instead of throwing error
+    return {
+      items: [],
+      totalCount: 0,
+      pageNumber: pageNumber,
+      pageSize: pageSize
+    };
   }
-  console.log('API URL:', url);
-  const response = await axios.get(url);
-  console.log('API Response:', response.data);
-  
-  // API returns data in this format (handle both Pascal and camelCase):
-  // { Products: [...], TotalItems: 10, PageNumber: 1, PageSize: 10 }
-  // or { products: [...], totalItems: 10, pageNumber: 1, pageSize: 10 }
-  return {
-    items: response.data.Products || response.data.products || [],
-    totalCount: response.data.TotalItems || response.data.totalItems || 0,
-    pageNumber: response.data.PageNumber || response.data.pageNumber || pageNumber,
-    pageSize: response.data.PageSize || response.data.pageSize || pageSize
-  };
 };
 
 export const getProductById = async (id) => {
-  const response = await axios.get(`${API_URL}/${id}`);
-  return response.data;
+  try {
+    const response = await axios.get(`${API_URL}/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching product by ID:', error);
+    throw error; // Re-throw to let component handle the error
+  }
 };
 
 export const getProductsByCategory = async (categoryId) => {
-  const response = await axios.get(`${API_URL}/category/${categoryId}`);
-  return response.data;
+  try {
+    const response = await axios.get(`${API_URL}/category/${categoryId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching products by category:', error);
+    return [];
+  }
 };
 
 export const getProductsByCategorySlug = async (slug) => {
-  const response = await axios.get(`${API_URL}/category-slug/${slug}`);
-  return response.data;
+  try {
+    const response = await axios.get(`${API_URL}/category-slug/${slug}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching products by category slug:', error);
+    return [];
+  }
 };
 
 export const getFeaturedProducts = async (count = 6) => {
-  const response = await axios.get(`${API_URL}/featured/${count}`);
-  return response.data;
+  try {
+    const response = await axios.get(`${API_URL}/featured/${count}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching featured products:', error);
+    // Return empty array instead of throwing error to prevent app crash
+    return [];
+  }
 };
 
 export const searchProducts = async (query) => {
-  const response = await axios.get(`${API_URL}/search?query=${encodeURIComponent(query)}`);
-  return response.data;
+  try {
+    const response = await axios.get(`${API_URL}/search?query=${encodeURIComponent(query)}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error searching products:', error);
+    return [];
+  }
 };
 
 export const createProduct = async (productData, mainImage, additionalImages = []) => {
