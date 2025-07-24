@@ -67,14 +67,17 @@ const EditProduct = () => {
             uid: img.split('/').pop() || img,
             name: img.split('/').pop() || 'image',
             status: 'done',
-            url: getFullImageUrl(img)
+            url: getFullImageUrl(img),
+            path: img // Lưu đường dẫn gốc
           }));
           setAdditionalImagePreviews(fullUrlAdditionalImages);
         }
 
-        // Set form values
+        // Set form values - Quan trọng: Đảm bảo lưu cả đường dẫn ảnh vào form
         form.setFieldsValue({
           ...productData,
+          originalImageUrl: productData.imageUrl, // Lưu đường dẫn ảnh chính gốc
+          originalAdditionalImages: productData.additionalImages // Lưu đường dẫn ảnh bổ sung gốc
         });
         
         // Fetch categories
@@ -146,7 +149,26 @@ const EditProduct = () => {
     setLoading(true);
     
     try {
-      await updateProduct(id, values, mainImageFile, additionalImageFiles);
+      // Đảm bảo đường dẫn ảnh cũ được giữ nguyên khi không có ảnh mới
+      // Đảm bảo imageUrl có giá trị từ originalImageUrl
+      if (!values.imageUrl && values.originalImageUrl) {
+        values.imageUrl = values.originalImageUrl;
+      }
+
+      // Đảm bảo additionalImages có giá trị từ originalAdditionalImages
+      if ((!values.additionalImages || values.additionalImages.length === 0) && values.originalAdditionalImages) {
+        values.additionalImages = values.originalAdditionalImages;
+      }
+      
+      console.log('Submitting form with values:', values);
+      
+      // Chỉ gửi ảnh mới nếu người dùng đã thay đổi ảnh
+      const mainImageToUpload = mainImageFile; // Nếu null, server sẽ giữ ảnh cũ
+      
+      // Chỉ gửi ảnh bổ sung nếu người dùng đã thay đổi
+      const additionalImagesToUpload = additionalImageFiles.length > 0 ? additionalImageFiles : null;
+      
+      await updateProduct(id, values, mainImageToUpload, additionalImagesToUpload);
       message.success('Cập nhật sản phẩm thành công');
       navigate('/admin/products');
     } catch (error) {
@@ -352,6 +374,12 @@ const EditProduct = () => {
             <Form.Item name="id" hidden>
               <Input />
             </Form.Item>
+            <Form.Item name="originalImageUrl" hidden>
+              <Input />
+            </Form.Item>
+            <Form.Item name="originalAdditionalImages" hidden>
+              <Input />
+            </Form.Item>
           </div>
 
           {/* Right Column - Images & Status */}
@@ -395,6 +423,9 @@ const EditProduct = () => {
                     Hỗ trợ tải lên một ảnh chính. Ảnh nên có kích thước không quá 2MB.
                   </p>
                 </Dragger>
+                <p className="mt-2 text-gray-500 text-sm">
+                  Nếu không tải ảnh mới, ảnh hiện tại sẽ được giữ nguyên.
+                </p>
               </Form.Item>
 
               <Form.Item label="Ảnh bổ sung">
@@ -441,7 +472,7 @@ const EditProduct = () => {
                   </p>
                 </Upload.Dragger>
                 <p className="mt-2 text-gray-500 text-sm">
-                  Lưu ý: Tải lên ảnh mới sẽ thay thế tất cả các ảnh bổ sung hiện tại
+                  Lưu ý: Nếu không tải lên ảnh mới, các ảnh bổ sung hiện tại sẽ được giữ nguyên.
                 </p>
               </Form.Item>
             </Card>

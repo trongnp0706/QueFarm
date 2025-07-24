@@ -125,23 +125,35 @@ export const createProduct = async (productData, mainImage, additionalImages = [
   return response.data;
 };
 
-export const updateProduct = async (id, productData, mainImage, additionalImages = []) => {
+export const updateProduct = async (id, productData, mainImage, additionalImages = null) => {
   const formData = new FormData();
   
+  // Lọc các trường không cần thiết trước khi gửi
+  const filteredProductData = { ...productData };
+  delete filteredProductData.originalImageUrl;
+  delete filteredProductData.originalAdditionalImages;
+  
   // Append product data, only non-empty values
-  Object.keys(productData).forEach(key => {
-    const value = productData[key];
+  Object.keys(filteredProductData).forEach(key => {
+    const value = filteredProductData[key];
     if (value !== null && value !== undefined && value !== '') {
-      formData.append(key, value);
+      // Xử lý đặc biệt cho mảng
+      if (Array.isArray(value)) {
+        value.forEach((item, index) => {
+          formData.append(`${key}[${index}]`, item);
+        });
+      } else {
+        formData.append(key, value);
+      }
     }
   });
   
-  // Append main image if it exists
+  // Append main image only if a new one is provided
   if (mainImage) {
     formData.append('mainImage', mainImage);
   }
   
-  // Append additional images if they exist
+  // Append additional images only if new ones are provided
   if (additionalImages && additionalImages.length > 0) {
     additionalImages.forEach(image => {
       formData.append('additionalImages', image);
