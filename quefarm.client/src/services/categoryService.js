@@ -14,6 +14,19 @@ const api = axios.create({
   }
 });
 
+// Thêm interceptor để gửi token xác thực khi có
+api.interceptors.request.use(config => {
+  // Lấy token từ localStorage
+  const token = localStorage.getItem('adminToken');
+  
+  // Thêm token vào header nếu có
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  
+  return config;
+});
+
 const API_PATH = '/api/category';
 
 // Bảng ánh xạ các ký tự tiếng Việt cho hàm tạo slug
@@ -70,9 +83,7 @@ const categoryService = {
   // Lấy tất cả danh mục
   getAllCategories: async () => {
     try {
-      console.log('Fetching categories from database...');
       const response = await api.get(API_PATH);
-      console.log('Categories fetched:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -94,7 +105,6 @@ const categoryService = {
   // Tạo danh mục mới
   createCategory: async (categoryData) => {
     try {
-      console.log("Creating category with data:", categoryData);
       const cleanData = sanitizeData(categoryData);
       const response = await api.post(API_PATH, cleanData);
       return response.data;
@@ -107,7 +117,6 @@ const categoryService = {
   // Cập nhật danh mục
   updateCategory: async (id, categoryData) => {
     try {
-      console.log("Updating category with data:", categoryData);
       const cleanData = sanitizeData(categoryData);
       const response = await api.put(`${API_PATH}/${id}`, cleanData);
       return response.data;
@@ -120,7 +129,6 @@ const categoryService = {
   // Xóa danh mục
   deleteCategory: async (id) => {
     try {
-      console.log(`Deleting category with ID: ${id}`);
       const response = await api.delete(`${API_PATH}/${id}`);
       return response.data;
     } catch (error) {

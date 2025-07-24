@@ -34,13 +34,11 @@ const ProductList = () => {
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
-      console.log('Fetching products...');
       const response = await productService.getAllProducts(
         searchParams.pageNumber || 1,
         searchParams.pageSize || 10,
         searchParams.searchTerm || ''
       );
-      console.log('Response received:', response);
       setProducts(response.items || []);
       setPagination({
         current: response.pageNumber || 1,

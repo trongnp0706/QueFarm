@@ -8,7 +8,6 @@ import { getAllProducts, deleteProduct } from '../../../services/productService'
 const { Option } = Select;
 
 const AdminProductList = () => {
-  console.log('AdminProductList component mounted');
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
@@ -30,7 +29,6 @@ const AdminProductList = () => {
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
-      console.log('Fetching products...');
       
       const response = await getAllProducts(
         searchParams.pageNumber || 1,
@@ -38,7 +36,6 @@ const AdminProductList = () => {
         searchParams.searchTerm || ''
       );
       
-      console.log('Response received:', response);
       
       // getAllProducts already handles the API format
       setProducts(response.items || []);

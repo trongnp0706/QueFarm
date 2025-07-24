@@ -14,7 +14,6 @@ import {
 const { Header, Content, Sider } = Layout;
 
 const AdminLayout = () => {
-  console.log('AdminLayout component mounted');
   const navigate = useNavigate();
   const location = useLocation();
   

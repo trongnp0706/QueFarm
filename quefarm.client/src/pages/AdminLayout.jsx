@@ -30,7 +30,7 @@ export default function AdminLayout({ tab, setTab, children }) {
         </div>
         {/* Logo */}
         <div className={`mb-8 flex items-center gap-2 ${collapsed ? 'justify-center' : ''} mt-2`} style={{ marginTop: collapsed ? 0 : 8 }}>
-          <img src="/logo.png" alt="Logo" className="w-10 h-10 flex-shrink-0" />
+          <img src="/logo.png" alt="Logo" className="w-10 h-10 flex-shrink-0 rounded-full" />
           {!collapsed && <span className="font-bold text-green-700 text-xl">Quê Farm</span>}
         </div>
         <nav className="flex flex-col gap-2">

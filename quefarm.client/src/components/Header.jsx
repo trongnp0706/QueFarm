@@ -14,7 +14,7 @@ function Header() {
         {/* Logo, Search, and Cart */}
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center">
-            <img src="/logo.png" alt="Viet Specialties" className="h-24 w-24" />
+            <img src="/logo.png" alt="Viet Specialties" className="h-24 w-24 rounded-full" />
           </Link>
           
           <div className="flex-1 mx-4">

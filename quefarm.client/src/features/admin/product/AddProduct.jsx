@@ -7,6 +7,7 @@ import { InboxOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import categoryService from '../../../services/categoryService';
 import ImageFallback from '../../../components/ImageFallback';
+import { compressImage, compressImages } from '../../../utils/imageCompression';
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -36,7 +37,7 @@ const AddProduct = () => {
     fetchCategories();
   }, []);
 
-  const handleMainImageChange = (info) => {
+  const handleMainImageChange = async (info) => {
     if (info.file.status === 'uploading') {
       return;
     }
@@ -44,23 +45,79 @@ const AddProduct = () => {
     if (info.file.status === 'done' || info.file.status === 'error') {
       // Get file object
       const file = info.file.originFileObj;
-      setMainImageFile(file);
       
-      // Generate preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setMainImagePreview(e.target.result);
-      };
-      reader.readAsDataURL(file);
+      try {
+        // Nén ảnh nếu kích thước lớn hơn 1MB
+        if (file.size > 1024 * 1024) {
+          message.info('Ảnh đang được nén để tải lên nhanh hơn...');
+          const compressedFile = await compressImage(file);
+          setMainImageFile(compressedFile);
+          
+          // Generate preview
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            setMainImagePreview(e.target.result);
+          };
+          reader.readAsDataURL(compressedFile);
+        } else {
+          setMainImageFile(file);
+          
+          // Generate preview
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            setMainImagePreview(e.target.result);
+          };
+          reader.readAsDataURL(file);
+        }
+      } catch (error) {
+        console.error('Error compressing image:', error);
+        message.error('Có lỗi khi xử lý ảnh');
+        
+        // Sử dụng file gốc nếu có lỗi
+        setMainImageFile(file);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setMainImagePreview(e.target.result);
+        };
+        reader.readAsDataURL(file);
+      }
     }
   };
 
-  const handleAdditionalImagesChange = (info) => {
+  const handleAdditionalImagesChange = async (info) => {
     const fileList = info.fileList;
     
     // Get file objects
     const files = fileList.map(file => file.originFileObj);
-    setAdditionalImageFiles(files);
+    
+    try {
+      // Nén tất cả các ảnh lớn hơn 1MB
+      const filesToCompress = files.filter(file => file && file.size > 1024 * 1024);
+      
+      if (filesToCompress.length > 0) {
+        message.info('Các ảnh bổ sung đang được nén để tải lên nhanh hơn...');
+        
+        // Nén các ảnh lớn
+        const compressedFiles = await compressImages(filesToCompress);
+        
+        // Thay thế các file gốc bằng các file đã nén
+        const finalFiles = files.map(file => {
+          if (!file) return file;
+          const compressedFile = compressedFiles.find(cf => cf.name === file.name);
+          return compressedFile || file;
+        });
+        
+        setAdditionalImageFiles(finalFiles);
+      } else {
+        setAdditionalImageFiles(files);
+      }
+    } catch (error) {
+      console.error('Error compressing images:', error);
+      message.error('Có lỗi khi xử lý ảnh');
+      
+      // Sử dụng file gốc nếu có lỗi
+      setAdditionalImageFiles(files);
+    }
   };
 
   const handleSubmit = async (values) => {
@@ -95,8 +152,6 @@ const AddProduct = () => {
         });
       }
 
-      console.log('Sending FormData:', Object.fromEntries(formDataToSend.entries()));
-
       const response = await fetch('https://localhost:7013/api/product', {
         method: 'POST',
         body: formDataToSend
@@ -126,12 +181,14 @@ const AddProduct = () => {
       const isImage = file.type.startsWith('image/');
       if (!isImage) {
         message.error('Bạn chỉ có thể tải lên tệp hình ảnh!');
+        return false;
     }
-      const isLt2M = file.size / 1024 / 1024 < 2;
-      if (!isLt2M) {
-        message.error('Hình ảnh phải nhỏ hơn 2MB!');
+      const isLt5M = file.size / 1024 / 1024 < 5;
+      if (!isLt5M) {
+        message.error('Hình ảnh phải nhỏ hơn 5MB!');
+        return false;
       }
-      return isImage && isLt2M;
+      return true;
     },
     customRequest: ({ onSuccess }) => {
       setTimeout(() => {
@@ -156,12 +213,14 @@ const AddProduct = () => {
     const isImage = file.type.startsWith('image/');
     if (!isImage) {
         message.error('Bạn chỉ có thể tải lên tệp hình ảnh!');
+        return false;
     }
-    const isLt2M = file.size / 1024 / 1024 < 2;
-    if (!isLt2M) {
-        message.error('Hình ảnh phải nhỏ hơn 2MB!');
+    const isLt5M = file.size / 1024 / 1024 < 5;
+    if (!isLt5M) {
+        message.error('Hình ảnh phải nhỏ hơn 5MB!');
+        return false;
     }
-      return isImage && isLt2M;
+      return true;
     },
     customRequest: ({ onSuccess }) => {
       setTimeout(() => {

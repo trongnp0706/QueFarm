@@ -19,7 +19,6 @@ const EditCategory = () => {
       setInitialLoading(true);
       try {
         const categoryData = await getCategoryById(id);
-        console.log("Category data fetched:", categoryData);
         form.setFieldsValue({
           name: categoryData.name,
           description: categoryData.description,
@@ -47,21 +46,32 @@ const EditCategory = () => {
         isActive: true
       };
       
-      console.log("Updating category with data:", categoryData);
       await updateCategory(id, categoryData);
       message.success('Cập nhật danh mục thành công');
       navigate('/admin/categories');
     } catch (error) {
       console.error('Error updating category:', error);
       
-      if (error.status) {
-        if (error.status === 401) {
-          message.error('Không có quyền cập nhật danh mục. Vui lòng liên hệ quản trị viên.');
+      if (error.response) {
+        // Lỗi từ Axios có response
+        const status = error.response.status;
+        
+        if (status === 401) {
+          message.error('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!');
+          // Chuyển hướng người dùng đến trang đăng nhập sau 2 giây
+          setTimeout(() => {
+            localStorage.removeItem('adminToken');
+            navigate('/admin/login');
+          }, 2000);
         } else {
-          message.error(`Lỗi: ${error.status} - ${error.statusText || error.message}`);
+          message.error(`Lỗi: ${status} - ${error.response.data || error.message}`);
         }
+      } else if (error.request) {
+        // Request gửi đi nhưng không nhận được response
+        message.error('Không thể kết nối đến server. Vui lòng thử lại sau.');
       } else {
-        message.error('Không thể cập nhật danh mục. Vui lòng thử lại sau.');
+        // Lỗi khi thiết lập request
+        message.error('Không thể cập nhật danh mục: ' + error.message);
       }
     } finally {
       setLoading(false);

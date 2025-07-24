@@ -17,7 +17,6 @@ const CategoryList = () => {
     setError(null);
     try {
       const data = await getAllCategories();
-      console.log("Categories fetched:", data);
       setCategories(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to fetch categories:', error);
@@ -34,23 +33,34 @@ const CategoryList = () => {
 
   const handleDelete = async (id) => {
     try {
-      console.log(`Deleting category with ID: ${id}`);
       await deleteCategory(id);
       message.success('Xóa danh mục thành công');
       fetchCategories();
     } catch (error) {
       console.error('Failed to delete category:', error);
       
-      if (error.status) {
-        if (error.status === 401) {
-          message.error('Không có quyền xóa danh mục. Vui lòng liên hệ quản trị viên.');
-        } else if (error.status === 400) {
+      if (error.response) {
+        // Lỗi từ Axios có response
+        const status = error.response.status;
+        
+        if (status === 401) {
+          message.error('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!');
+          // Chuyển hướng người dùng đến trang đăng nhập sau 2 giây
+          setTimeout(() => {
+            localStorage.removeItem('adminToken');
+            navigate('/admin/login');
+          }, 2000);
+        } else if (status === 400) {
           message.error('Không thể xóa danh mục có sản phẩm liên kết.');
         } else {
-          message.error(`Lỗi: ${error.status} - ${error.statusText || error.message}`);
+          message.error(`Lỗi: ${status} - ${error.response.data || error.message}`);
         }
+      } else if (error.request) {
+        // Request gửi đi nhưng không nhận được response
+        message.error('Không thể kết nối đến server. Vui lòng thử lại sau.');
       } else {
-        message.error('Không thể xóa danh mục. Vui lòng thử lại sau.');
+        // Lỗi khi thiết lập request
+        message.error('Không thể xóa danh mục: ' + error.message);
       }
     }
   };

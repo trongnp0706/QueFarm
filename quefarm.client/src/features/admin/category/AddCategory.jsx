@@ -22,7 +22,6 @@ const AddCategory = () => {
         isActive: true
       };
       
-      console.log("Creating category with data:", categoryData);
       await createCategory(categoryData);
       message.success('Thêm danh mục thành công');
       navigate('/admin/categories');

@@ -15,9 +15,7 @@ export const getAllProducts = async (pageNumber = 1, pageSize = 10, searchTerm =
     if (searchTerm) {
       url += `&search=${encodeURIComponent(searchTerm)}`;
     }
-    console.log('API URL:', url);
     const response = await axios.get(url);
-    console.log('API Response:', response.data);
     
     // API returns data in this format (handle both Pascal and camelCase):
     // { Products: [...], TotalItems: 10, PageNumber: 1, PageSize: 10 }
@@ -114,8 +112,6 @@ export const createProduct = async (productData, mainImage, additionalImages = [
     });
   }
   
-  console.log('Creating product with FormData:', Object.fromEntries(formData.entries()));
-  
   const response = await axios.post(API_URL, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
@@ -159,8 +155,6 @@ export const updateProduct = async (id, productData, mainImage, additionalImages
       formData.append('additionalImages', image);
     });
   }
-  
-  console.log('Updating product with FormData:', Object.fromEntries(formData.entries()));
   
   const response = await axios.put(`${API_URL}/${id}`, formData, {
     headers: {

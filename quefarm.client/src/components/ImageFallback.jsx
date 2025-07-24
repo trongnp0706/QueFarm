@@ -29,9 +29,6 @@ const ImageFallback = ({ src, alt, fallbackSrc = '/logo.png', style, width, heig
   const [currentSrc, setCurrentSrc] = useState(resolvedSrc);
 
   const handleError = () => {
-    if (debug) {
-      console.log('ImageFallback: Error loading image:', currentSrc);
-    }
     if (!imageError && currentSrc !== resolvedFallbackSrc) {
       setImageError(true);
       setCurrentSrc(resolvedFallbackSrc);
@@ -39,9 +36,6 @@ const ImageFallback = ({ src, alt, fallbackSrc = '/logo.png', style, width, heig
   };
 
   const handleLoad = () => {
-    if (debug) {
-      console.log('ImageFallback: Successfully loaded image:', currentSrc);
-    }
     if (imageError && currentSrc === resolvedSrc) {
       setImageError(false);
     }
@@ -52,9 +46,6 @@ const ImageFallback = ({ src, alt, fallbackSrc = '/logo.png', style, width, heig
     const newResolvedSrc = resolveImageUrl(src);
     if (newResolvedSrc !== currentSrc && !imageError) {
       setCurrentSrc(newResolvedSrc);
-      if (debug) {
-        console.log('ImageFallback: Src changed to:', newResolvedSrc);
-      }
     }
   }, [src, currentSrc, imageError, debug]);
 
