@@ -2,41 +2,57 @@ import { useParams, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Card, Row, Col, Spin, Alert, Empty, Typography, Tag, Rate, Button } from 'antd';
 import { ShoppingCartOutlined, HeartOutlined, AppstoreOutlined } from '@ant-design/icons';
+import { getCategoryById, getCategoryBySlug } from '../services/categoryService';
+import { getProductsByCategorySlug } from '../services/productService';
 
 const { Title, Paragraph } = Typography;
 
 function CategoryPage() {
-  const { id } = useParams();
+  const { categorySlug } = useParams();
   const [category, setCategory] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Determine if the parameter is a numeric ID or a slug
+  const isNumeric = /^\d+$/.test(categorySlug);
 
   useEffect(() => {
-    setLoading(true);
-    setError(null);
-    fetch(`/api/category/${id}`)
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        return res.json();
-      })
-      .then(data => {
-        setCategory(data);
-        return fetch(`/api/product?categoryId=${id}`);
-      })
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        return res.json();
-      })
-      .then(data => {
-        setProducts(data);
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        let categoryData;
+        let productsData;
+        
+        if (isNumeric) {
+          // Fetch by ID
+          categoryData = await getCategoryById(categorySlug);
+          // For ID-based requests, we need to fetch products differently
+          const response = await fetch(`/api/product?categoryId=${categorySlug}`);
+          if (!response.ok) throw new Error('Failed to fetch products');
+          productsData = await response.json();
+        } else {
+          // Fetch by slug
+          categoryData = await getCategoryBySlug(categorySlug);
+          productsData = await getProductsByCategorySlug(categorySlug);
+        }
+        
+        setCategory(categoryData);
+        setProducts(productsData);
+      } catch (err) {
+        console.error('Error fetching category or products:', err);
+        setError(err.response?.status === 404 ? 'Không tìm thấy danh mục' : 'Có lỗi xảy ra khi tải dữ liệu');
+      } finally {
         setLoading(false);
-      })
-      .catch(err => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, [id]);
+      }
+    };
+
+    if (categorySlug) {
+      fetchData();
+    }
+  }, [categorySlug, isNumeric]);
 
   if (loading) {
     return (
@@ -83,11 +99,11 @@ function CategoryPage() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <Title level={2} className="text-green-700 mb-2">
-                <AppstoreOutlined className="mr-2" />{category.Name}
+                <AppstoreOutlined className="mr-2" />{category.name || category.Name}
               </Title>
-              {category.Description && (
+              {(category.description || category.Description) && (
                 <Paragraph className="text-gray-600 text-lg mb-2">
-                  {category.Description}
+                  {category.description || category.Description}
                 </Paragraph>
               )}
             </div>
@@ -138,8 +154,8 @@ function CategoryPage() {
                     description={
                       <div>
                         <div className="flex items-center gap-2 mb-2">
-                          <Rate disabled defaultValue={product.rating} className="text-xs" />
-                          <span className="text-xs text-gray-500">({product.rating})</span>
+                          <Rate disabled defaultValue={product.rating || 4} className="text-xs" />
+                          <span className="text-xs text-gray-500">({product.rating || 4})</span>
                         </div>
                         <span className="text-lg font-bold text-red-600 block mb-1">
                           {product.price.toLocaleString()} đ
@@ -165,4 +181,4 @@ function CategoryPage() {
   );
 }
 
-export default CategoryPage; 
+export default CategoryPage;

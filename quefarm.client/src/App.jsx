@@ -61,20 +61,11 @@ function App() {
               <FloatingActionButton />
             </>
           } />
-          <Route path="/category/:id" element={
-            <>
-              <Header />
-              <Breadcrumb />
-              <CategoryPage />
-              <Footer />
-              <FloatingActionButton />
-            </>
-          } />
           <Route path="/category/:categorySlug" element={
             <>
               <Header />
               <Breadcrumb />
-              <ProductList />
+              <CategoryPage />
               <Footer />
               <FloatingActionButton />
             </>

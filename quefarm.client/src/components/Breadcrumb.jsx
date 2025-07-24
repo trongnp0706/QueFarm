@@ -46,19 +46,36 @@ function Breadcrumb() {
         });
     }
     // Nếu là trang danh mục
-    else if (location.pathname.startsWith('/category/') && params.id) {
+    else if (location.pathname.startsWith('/category/') && (params.id || params.categorySlug)) {
       setLoading(true);
-      fetch(`/api/category/${params.id}`)
-        .then(res => res.json())
-        .then(data => {
-          setCategory(data);
-          setLoading(false);
-        })
-        .catch(() => {
-          setLoading(false);
-        });
+      const categoryParam = params.id || params.categorySlug;
+      const isNumeric = /^\d+$/.test(categoryParam);
+      
+      if (isNumeric) {
+        // Fetch by ID
+        fetch(`/api/category/${categoryParam}`)
+          .then(res => res.json())
+          .then(data => {
+            setCategory(data);
+            setLoading(false);
+          })
+          .catch(() => {
+            setLoading(false);
+          });
+      } else {
+        // Fetch by slug
+        fetch(`/api/category/slug/${categoryParam}`)
+          .then(res => res.json())
+          .then(data => {
+            setCategory(data);
+            setLoading(false);
+          })
+          .catch(() => {
+            setLoading(false);
+          });
+      }
     }
-  }, [location.pathname, params.id]);
+  }, [location.pathname, params.id, params.categorySlug]);
 
   // Xây dựng breadcrumb items cho Ant Design
   const breadcrumbItems = [
@@ -73,12 +90,17 @@ function Breadcrumb() {
 
   if (category) {
     const catName = category.Name || category.name;
+    const catSlug = category.Slug || category.slug;
     const catId = category.Id || category.id;
+    
+    // Ưu tiên sử dụng slug, fallback về ID nếu không có slug
+    const categoryLink = catSlug ? `/category/${catSlug}` : `/category/${catId}`;
+    
     breadcrumbItems.push({
       title: location.pathname.startsWith('/category/') ? (
         <span className="text-gray-800 font-medium">{catName}</span>
       ) : (
-        <Link to={`/category/${catId}`} className="text-gray-600 hover:text-green-600">
+        <Link to={categoryLink} className="text-gray-600 hover:text-green-600">
           {catName}
         </Link>
       ),

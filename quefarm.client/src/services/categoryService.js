@@ -102,6 +102,17 @@ const categoryService = {
     }
   },
 
+  // Lấy danh mục theo slug
+  getCategoryBySlug: async (slug) => {
+    try {
+      const response = await api.get(`${API_PATH}/slug/${slug}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching category with slug ${slug}:`, error);
+      throw error;
+    }
+  },
+
   // Tạo danh mục mới
   createCategory: async (categoryData) => {
     try {
@@ -144,6 +155,7 @@ const categoryService = {
 // Export các hàm để sử dụng import có tên
 export const getAllCategories = categoryService.getAllCategories;
 export const getCategoryById = categoryService.getCategoryById;
+export const getCategoryBySlug = categoryService.getCategoryBySlug;
 export const createCategory = categoryService.createCategory;
 export const updateCategory = categoryService.updateCategory;
 export const deleteCategory = categoryService.deleteCategory;
