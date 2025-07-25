@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  quefarm-api:
+    build: .
+    ports:
+      - "8080:80"
+      - "8443:443"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=QueFarmDb;User Id=sa;Password=QueFarm123!;TrustServerCertificate=true;
+      - JwtSettings__SecretKey=your-super-secret-production-key-with-at-least-32-characters-change-this
+    depends_on:
+      - sqlserver
+    volumes:
+      - ./uploads:/app/wwwroot/images
+    networks:
+      - quefarm-network
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=QueFarm123!
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - quefarm-network
+
+volumes:
+  sqlserver_data:
+
+networks:
+  quefarm-network:
+    driver: bridge

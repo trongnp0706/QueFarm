@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Card, Row, Col, Spin, Alert, Empty, Typography, Tag, Rate, Button } from 'antd';
 import { ShoppingCartOutlined, HeartOutlined, AppstoreOutlined } from '@ant-design/icons';
 import { getCategoryById, getCategoryBySlug } from '../services/categoryService';
-import { getProductsByCategorySlug } from '../services/productService';
+import { getProductsByCategorySlug, generateImageUrl } from '../services/productService';
 
 const { Title, Paragraph } = Typography;
 
@@ -127,7 +127,12 @@ function CategoryPage() {
                     <div className="relative">
                       <img
                         alt={product.name}
-                        src={product.imageUrl || (product.images && product.images.length > 0 ? product.images[0].imageUrl : '')}
+                        src={generateImageUrl(
+                          product.imageUrl || 
+                          (product.images && product.images.length > 0 
+                            ? product.images[0].imageUrl 
+                            : null)
+                        )}
                         className="h-48 w-full object-cover rounded-t-lg"
                         onError={e => { e.target.src = 'https://via.placeholder.com/300x200?text=No+Image'; }}
                       />

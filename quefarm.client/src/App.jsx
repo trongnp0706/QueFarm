@@ -17,7 +17,6 @@ import AdminLayout from './layouts/AdminLayout';
 import Dashboard from './features/admin/Dashboard';
 import ProductManagement from './features/admin/product/ProductManagement';
 import CategoryManagement from './features/admin/category/CategoryManagement';
-import TestAPI from './debug/TestAPI';
 
 function App() {
   return (
@@ -106,9 +105,6 @@ function App() {
               <FloatingActionButton />
             </>
           } />
-          
-          {/* Debug Route - Remove in production */}
-          <Route path="/debug/api" element={<TestAPI />} />
           
           {/* Static Pages */}
           <Route path="/about" element={

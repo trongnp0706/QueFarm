@@ -4,7 +4,7 @@ import ImageFallback from '../components/ImageFallback';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FiArrowRight, FiArrowLeft } from 'react-icons/fi';
-import { getFeaturedProducts, getAllProducts } from '../services/productService';
+import { getFeaturedProducts, getAllProducts, generateImageUrl } from '../services/productService';
 
 function ProductSection({ title, products, viewAllLink, loading = false }) {
   return (
@@ -212,102 +212,156 @@ function HomePage() {
         const featuredProducts = featuredResponse || [];
         const allProducts = allProductsResponse.items || [];
         
+        // Process products to ensure correct format
+        const processedAllProducts = allProducts.map(product => {
+          console.log('HomePage: Processing product for images:', product.name, product);
+          
+          // Try to get image URL from various possible properties
+          let finalImageUrl = '/placeholder.png';
+          
+          // Check direct imageUrl properties
+          if (product.imageUrl && product.imageUrl.trim()) {
+            finalImageUrl = product.imageUrl;
+          } else if (product.ImageUrl && product.ImageUrl.trim()) {
+            finalImageUrl = product.ImageUrl;
+          }
+          // Check images array
+          else if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+            const firstImage = product.images[0];
+            finalImageUrl = firstImage.imageUrl || firstImage.ImageUrl || firstImage.url || firstImage.Url;
+          }
+          // Check Images array (Pascal case)
+          else if (product.Images && Array.isArray(product.Images) && product.Images.length > 0) {
+            const firstImage = product.Images[0];
+            finalImageUrl = firstImage.imageUrl || firstImage.ImageUrl || firstImage.url || firstImage.Url;
+          }
+          // Check productImages array
+          else if (product.productImages && Array.isArray(product.productImages) && product.productImages.length > 0) {
+            const firstImage = product.productImages[0];
+            finalImageUrl = firstImage.imageUrl || firstImage.ImageUrl;
+          }
+          // Check ProductImages array (Pascal case)
+          else if (product.ProductImages && Array.isArray(product.ProductImages) && product.ProductImages.length > 0) {
+            const firstImage = product.ProductImages[0];
+            finalImageUrl = firstImage.imageUrl || firstImage.ImageUrl;
+          }
+          
+          console.log('HomePage: Final image URL for', product.name, ':', finalImageUrl);
+          
+          return {
+            ...product,
+            imageUrl: generateImageUrl(finalImageUrl),
+            // Ensure price is properly formatted
+            price: product.price || product.Price || 0,
+            originalPrice: product.originalPrice || product.OriginalPrice,
+            // Handle different naming conventions
+            name: product.name || product.Name || 'Sản phẩm',
+            discountPercentage: product.discount || product.Discount || product.discountPercentage,
+            region: product.region || product.Region
+          };
+        });
+
+        const processedFeaturedProducts = featuredProducts.map(product => {
+          // Apply same processing logic for featured products
+          let finalImageUrl = '/placeholder.png';
+          
+          if (product.imageUrl && product.imageUrl.trim()) {
+            finalImageUrl = product.imageUrl.startsWith('http') 
+              ? product.imageUrl 
+              : `https://localhost:7013${product.imageUrl}`;
+          } else if (product.ImageUrl && product.ImageUrl.trim()) {
+            finalImageUrl = product.ImageUrl.startsWith('http') 
+              ? product.ImageUrl 
+              : `https://localhost:7013${product.ImageUrl}`;
+          } else if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+            const firstImage = product.images[0];
+            finalImageUrl = firstImage.imageUrl 
+              ? (firstImage.imageUrl.startsWith('http') 
+                ? firstImage.imageUrl 
+                : `https://localhost:7013${firstImage.imageUrl}`)
+              : (firstImage.ImageUrl 
+                ? (firstImage.ImageUrl.startsWith('http') 
+                  ? firstImage.ImageUrl 
+                  : `https://localhost:7013${firstImage.ImageUrl}`)
+                : '/placeholder.png');
+          } else if (product.Images && Array.isArray(product.Images) && product.Images.length > 0) {
+            const firstImage = product.Images[0];
+            finalImageUrl = firstImage.imageUrl 
+              ? (firstImage.imageUrl.startsWith('http') 
+                ? firstImage.imageUrl 
+                : `https://localhost:7013${firstImage.imageUrl}`)
+              : (firstImage.ImageUrl 
+                ? (firstImage.ImageUrl.startsWith('http') 
+                  ? firstImage.ImageUrl 
+                  : `https://localhost:7013${firstImage.ImageUrl}`)
+                : '/placeholder.png');
+          } else if (product.productImages && Array.isArray(product.productImages) && product.productImages.length > 0) {
+            const firstImage = product.productImages[0];
+            finalImageUrl = firstImage.imageUrl 
+              ? (firstImage.imageUrl.startsWith('http') 
+                ? firstImage.imageUrl 
+                : `https://localhost:7013${firstImage.imageUrl}`)
+              : (firstImage.ImageUrl 
+                ? (firstImage.ImageUrl.startsWith('http') 
+                  ? firstImage.ImageUrl 
+                  : `https://localhost:7013${firstImage.ImageUrl}`)
+                : '/placeholder.png');
+          } else if (product.ProductImages && Array.isArray(product.ProductImages) && product.ProductImages.length > 0) {
+            const firstImage = product.ProductImages[0];
+            finalImageUrl = firstImage.imageUrl 
+              ? (firstImage.imageUrl.startsWith('http') 
+                ? firstImage.imageUrl 
+                : `https://localhost:7013${firstImage.imageUrl}`)
+              : (firstImage.ImageUrl 
+                ? (firstImage.ImageUrl.startsWith('http') 
+                  ? firstImage.ImageUrl 
+                  : `https://localhost:7013${firstImage.ImageUrl}`)
+                : '/placeholder.png');
+          }
+          
+          // Ensure full URL for images from server
+          if (finalImageUrl && finalImageUrl !== '/placeholder.png' && !finalImageUrl.startsWith('http')) {
+            if (finalImageUrl.startsWith('/')) {
+              finalImageUrl = `https://localhost:7013${finalImageUrl}`;
+            } else if (finalImageUrl.startsWith('images/') || finalImageUrl.startsWith('wwwroot/')) {
+              finalImageUrl = `https://localhost:7013/${finalImageUrl}`;
+            } else {
+              finalImageUrl = `https://localhost:7013/images/${finalImageUrl}`;
+            }
+          }
+          
+          return {
+            ...product,
+            imageUrl: finalImageUrl,
+            price: product.price || product.Price || 0,
+            originalPrice: product.originalPrice || product.OriginalPrice,
+            name: product.name || product.Name || 'Sản phẩm',
+            discountPercentage: product.discount || product.Discount || product.discountPercentage,
+            region: product.region || product.Region
+          };
+        });
+        
         // Set products for different sections
-        setNewProducts(allProducts.slice(0, 4));
-        setBestSellers(featuredProducts.slice(0, 8));
+        setNewProducts(processedAllProducts.slice(0, 4));
+        setBestSellers(processedFeaturedProducts.slice(0, 8));
         
         // Filter products by region if available
-        const southProducts = allProducts.filter(p => p.region === "Miền Nam").slice(0, 4);
-        const centralProducts = allProducts.filter(p => p.region === "Miền Trung").slice(0, 4);
+        const southProducts = processedAllProducts.filter(p => p.region === "Miền Nam").slice(0, 4);
+        const centralProducts = processedAllProducts.filter(p => p.region === "Miền Trung").slice(0, 4);
         
-        // Fallback to first 4 products if no region-specific products
-        setSouthProducts(southProducts.length > 0 ? southProducts : allProducts.slice(0, 4));
-        setCentralProducts(centralProducts.length > 0 ? centralProducts : allProducts.slice(4, 8));
+        // Use available products or take from all products if no region-specific products
+        setSouthProducts(southProducts.length > 0 ? southProducts : processedAllProducts.slice(0, 4));
+        setCentralProducts(centralProducts.length > 0 ? centralProducts : processedAllProducts.slice(4, 8));
         
       } catch (error) {
         console.error('Error fetching products:', error);
-        setError('Không thể tải sản phẩm. Đang sử dụng dữ liệu mẫu.');
+        setError('Không thể tải sản phẩm từ database. Vui lòng kiểm tra kết nối server.');
         
-        // Fallback to mock data with better structure
-        const mockProducts = [
-          { 
-            id: 1, 
-            name: "Lạp xưởng tươi tôm - Gói 250gr", 
-            price: 66700, 
-            originalPrice: 80040, 
-            discountPercentage: 17,
-            imageUrl: "/images/products/lap-xuong-tom-250gr.jpg",
-            region: "Miền Nam"
-          },
-          { 
-            id: 2, 
-            name: "Lạp xưởng tươi tôm - Gói 500gr", 
-            price: 138500, 
-            originalPrice: 166200, 
-            discountPercentage: 17,
-            imageUrl: "/images/products/lap-xuong-tom-500gr.jpg",
-            region: "Miền Nam"
-          },
-          { 
-            id: 3, 
-            name: "Lạp xưởng tươi bò - Gói 250gr", 
-            price: 62200, 
-            originalPrice: 74640, 
-            discountPercentage: 17,
-            imageUrl: "/images/products/lap-xuong-bo-250gr.jpg",
-            region: "Miền Nam"
-          },
-          { 
-            id: 4, 
-            name: "Lạp xưởng tươi bò - Gói 500gr", 
-            price: 124500, 
-            originalPrice: 149400, 
-            discountPercentage: 17,
-            imageUrl: "/images/products/lap-xuong-bo-500gr.jpg",
-            region: "Miền Nam"
-          },
-          { 
-            id: 5, 
-            name: "Bánh gai - Gói 250gr", 
-            price: 36500, 
-            originalPrice: 40150, 
-            discountPercentage: 9,
-            imageUrl: "/images/products/banh-gai-250gr.jpg",
-            region: "Miền Bắc"
-          },
-          { 
-            id: 6, 
-            name: "Nem chua Thanh Hóa - Gói 300gr", 
-            price: 42000, 
-            originalPrice: 48000, 
-            discountPercentage: 12,
-            imageUrl: "/images/products/nem-chua-thanh-hoa-300gr.jpg",
-            region: "Miền Trung"
-          },
-          { 
-            id: 7, 
-            name: "Mắm ruốc Huế - Hũ 200gr", 
-            price: 65000, 
-            originalPrice: 72000, 
-            discountPercentage: 10,
-            imageUrl: "/images/products/mam-ruoc-hue-200gr.jpg",
-            region: "Miền Trung"
-          },
-          { 
-            id: 8, 
-            name: "Bánh đậu xanh nướng 250gr", 
-            price: 48000, 
-            originalPrice: 55200, 
-            discountPercentage: 13,
-            imageUrl: "/images/products/banh-dau-xanh-250gr.jpg",
-            region: "Miền Bắc"
-          }
-        ];
-        
-        setNewProducts(mockProducts.slice(0, 4));
-        setBestSellers(mockProducts);
-        setSouthProducts(mockProducts.filter(p => p.region === "Miền Nam"));
-        setCentralProducts(mockProducts.filter(p => p.region === "Miền Trung"));
+        // Set empty arrays instead of mock data
+        setNewProducts([]);
+        setBestSellers([]);
+        setSouthProducts([]);
+        setCentralProducts([]);
       } finally {
         setLoading(false);
       }

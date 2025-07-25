@@ -9,84 +9,80 @@ axios.defaults.baseURL = API_BASE_URL;
 
 const API_URL = '/api/product';
 
-export const getAllProducts = async (pageNumber = 1, pageSize = 10, searchTerm = '') => {
-  try {
-    let url = `${API_URL}?pageNumber=${pageNumber}&pageSize=${pageSize}`;
-    if (searchTerm) {
-      url += `&search=${encodeURIComponent(searchTerm)}`;
-    }
-    const response = await axios.get(url);
-    
-    // API returns data in this format (handle both Pascal and camelCase):
-    // { Products: [...], TotalItems: 10, PageNumber: 1, PageSize: 10 }
-    // or { products: [...], totalItems: 10, pageNumber: 1, pageSize: 10 }
-    return {
-      items: response.data.Products || response.data.products || [],
-      totalCount: response.data.TotalItems || response.data.totalItems || 0,
-      pageNumber: response.data.PageNumber || response.data.pageNumber || pageNumber,
-      pageSize: response.data.PageSize || response.data.pageSize || pageSize
-    };
-  } catch (error) {
-    console.error('Error fetching products:', error);
-    // Return empty result instead of throwing error
-    return {
-      items: [],
-      totalCount: 0,
-      pageNumber: pageNumber,
-      pageSize: pageSize
-    };
+// Configure base URL for images
+const getImageBaseUrl = () => {
+  // Priority order:
+  // 1. VITE_API_BASE_URL environment variable
+  // 2. Window location origin for local development
+  // 3. Fallback to relative path
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL.replace(/\/+$/, ''); // Remove trailing slashes
   }
+
+  // For local development
+  if (window.location.hostname === 'localhost') {
+    return 'https://localhost:7013';
+  }
+
+  // Production: use the current origin
+  return window.location.origin;
+};
+
+// Helper function to generate full image URL
+export const generateImageUrl = (imageUrl) => {
+  // If already a full URL, return as-is
+  if (!imageUrl || imageUrl.startsWith('http')) {
+    return imageUrl || '/placeholder.png';
+  }
+
+  // Ensure image path starts with a slash
+  const normalizedImageUrl = imageUrl.startsWith('/') ? imageUrl : `/${imageUrl}`;
+
+  // Combine base URL with image path
+  return `${getImageBaseUrl()}${normalizedImageUrl}`;
+};
+
+export const getAllProducts = async (pageNumber = 1, pageSize = 10, searchTerm = '') => {
+  let url = `${API_URL}?pageNumber=${pageNumber}&pageSize=${pageSize}`;
+  if (searchTerm) {
+    url += `&search=${encodeURIComponent(searchTerm)}`;
+  }
+  const response = await axios.get(url);
+  
+  // API returns data in this format (handle both Pascal and camelCase):
+  // { Products: [...], TotalItems: 10, PageNumber: 1, PageSize: 10 }
+  // or { products: [...], totalItems: 10, pageNumber: 1, pageSize: 10 }
+  return {
+    items: response.data.Products || response.data.products || [],
+    totalCount: response.data.TotalItems || response.data.totalItems || 0,
+    pageNumber: response.data.PageNumber || response.data.pageNumber || pageNumber,
+    pageSize: response.data.PageSize || response.data.pageSize || pageSize
+  };
 };
 
 export const getProductById = async (id) => {
-  try {
-    const response = await axios.get(`${API_URL}/${id}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching product by ID:', error);
-    throw error; // Re-throw to let component handle the error
-  }
+  const response = await axios.get(`${API_URL}/${id}`);
+  return response.data;
 };
 
 export const getProductsByCategory = async (categoryId) => {
-  try {
-    const response = await axios.get(`${API_URL}/category/${categoryId}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching products by category:', error);
-    return [];
-  }
+  const response = await axios.get(`${API_URL}/category/${categoryId}`);
+  return response.data;
 };
 
 export const getProductsByCategorySlug = async (slug) => {
-  try {
-    const response = await axios.get(`${API_URL}/category-slug/${slug}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching products by category slug:', error);
-    return [];
-  }
+  const response = await axios.get(`${API_URL}/category-slug/${slug}`);
+  return response.data;
 };
 
 export const getFeaturedProducts = async (count = 6) => {
-  try {
-    const response = await axios.get(`${API_URL}/featured/${count}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching featured products:', error);
-    // Return empty array instead of throwing error to prevent app crash
-    return [];
-  }
+  const response = await axios.get(`${API_URL}/featured/${count}`);
+  return response.data;
 };
 
 export const searchProducts = async (query) => {
-  try {
-    const response = await axios.get(`${API_URL}/search?query=${encodeURIComponent(query)}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error searching products:', error);
-    return [];
-  }
+  const response = await axios.get(`${API_URL}/search?query=${encodeURIComponent(query)}`);
+  return response.data;
 };
 
 export const createProduct = async (productData, mainImage, additionalImages = []) => {
@@ -121,35 +117,23 @@ export const createProduct = async (productData, mainImage, additionalImages = [
   return response.data;
 };
 
-export const updateProduct = async (id, productData, mainImage, additionalImages = null) => {
+export const updateProduct = async (id, productData, mainImage, additionalImages = []) => {
   const formData = new FormData();
   
-  // Lọc các trường không cần thiết trước khi gửi
-  const filteredProductData = { ...productData };
-  delete filteredProductData.originalImageUrl;
-  delete filteredProductData.originalAdditionalImages;
-  
   // Append product data, only non-empty values
-  Object.keys(filteredProductData).forEach(key => {
-    const value = filteredProductData[key];
+  Object.keys(productData).forEach(key => {
+    const value = productData[key];
     if (value !== null && value !== undefined && value !== '') {
-      // Xử lý đặc biệt cho mảng
-      if (Array.isArray(value)) {
-        value.forEach((item, index) => {
-          formData.append(`${key}[${index}]`, item);
-        });
-      } else {
-        formData.append(key, value);
-      }
+      formData.append(key, value);
     }
   });
   
-  // Append main image only if a new one is provided
+  // Append main image if it exists
   if (mainImage) {
     formData.append('mainImage', mainImage);
   }
   
-  // Append additional images only if new ones are provided
+  // Append additional images if they exist
   if (additionalImages && additionalImages.length > 0) {
     additionalImages.forEach(image => {
       formData.append('additionalImages', image);
