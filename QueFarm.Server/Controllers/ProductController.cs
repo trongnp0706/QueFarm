@@ -138,50 +138,39 @@ namespace QueFarm.Server.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
         [Authorize]
-        public async Task<IActionResult> CreateWithImages(
-            [FromForm, Required] string name,
-            [FromForm, Required] decimal price,
-            [FromForm, Required] int categoryId,
-            [FromForm] string? description = null,
-            [FromForm] decimal? originalPrice = null,
-            [FromForm] int stockQuantity = 0,
-            [FromForm] string? origin = null,
-            [FromForm] string? weight = null,
-            [FromForm] string? region = null,
-            [FromForm] IFormFile? mainImage = null,
-            [FromForm] List<IFormFile>? additionalImages = null)
+        public async Task<IActionResult> CreateWithImages([FromForm] CreateProductWithImagesRequest request)
         {
             try
             {
                 // Validate input data
-                if (string.IsNullOrWhiteSpace(name))
+                if (string.IsNullOrWhiteSpace(request.Name))
                     return BadRequest("Product name is required");
                     
-                if (price <= 0)
+                if (request.Price <= 0)
                     return BadRequest("Price must be greater than 0");
                     
-                if (categoryId <= 0)
+                if (request.CategoryId <= 0)
                     return BadRequest("Valid category ID is required");
 
                 // Validate main image if provided
-                if (mainImage != null)
+                if (request.MainImage != null)
                 {
                     var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp", "image/jpg" };
-                    if (!allowedTypes.Contains(mainImage.ContentType.ToLower()))
+                    if (!allowedTypes.Contains(request.MainImage.ContentType.ToLower()))
                         return BadRequest("Main image must be JPEG, PNG, or WebP format");
                         
-                    if (mainImage.Length > 5 * 1024 * 1024)
+                    if (request.MainImage.Length > 5 * 1024 * 1024)
                         return BadRequest("Main image size must be less than 5MB");
                 }
 
                 // Validate additional images if provided
-                if (additionalImages != null && additionalImages.Any())
+                if (request.AdditionalImages != null && request.AdditionalImages.Any())
                 {
-                    if (additionalImages.Count > 10)
+                    if (request.AdditionalImages.Count > 10)
                         return BadRequest("Maximum 10 additional images allowed");
 
                     var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp", "image/jpg" };
-                    foreach (var img in additionalImages)
+                    foreach (var img in request.AdditionalImages)
                     {
                         if (!allowedTypes.Contains(img.ContentType.ToLower()))
                             return BadRequest($"Image {img.FileName} must be JPEG, PNG, or WebP format");
@@ -194,19 +183,19 @@ namespace QueFarm.Server.Controllers
                 // Create CreateProductDto from form data
                 var productDto = new CreateProductDto
                 {
-                    Name = name,
-                    Description = description,
-                    Price = price,
-                    OriginalPrice = originalPrice,
-                    CategoryId = categoryId,
-                    StockQuantity = stockQuantity,
-                    Origin = origin,
-                    Weight = weight,
-                    Region = region
+                    Name = request.Name,
+                    Description = request.Description,
+                    Price = request.Price,
+                    OriginalPrice = request.OriginalPrice,
+                    CategoryId = request.CategoryId,
+                    StockQuantity = request.StockQuantity,
+                    Origin = request.Origin,
+                    Weight = request.Weight,
+                    Region = request.Region
                 };
 
                 // Create product with images
-                var product = await _productService.CreateProductAsync(productDto, mainImage, additionalImages);
+                var product = await _productService.CreateProductAsync(productDto, request.MainImage, request.AdditionalImages);
                 return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
             }
             catch (Exception ex)
@@ -289,52 +278,39 @@ namespace QueFarm.Server.Controllers
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
         [Authorize]
-        public async Task<IActionResult> UpdateWithImages(
-            int id,
-            [FromForm, Required] string name,
-            [FromForm, Required] decimal price,
-            [FromForm, Required] int categoryId,
-            [FromForm] string? description = null,
-            [FromForm] decimal? originalPrice = null,
-            [FromForm] int stockQuantity = 0,
-            [FromForm] string? origin = null,
-            [FromForm] string? weight = null,
-            [FromForm] string? region = null,
-            [FromForm] bool isActive = true,
-            [FromForm] IFormFile? mainImage = null,
-            [FromForm] List<IFormFile>? additionalImages = null)
+        public async Task<IActionResult> UpdateWithImages(int id, [FromForm] UpdateProductWithImagesRequest request)
         {
             try
             {
                 // Validate input data
-                if (string.IsNullOrWhiteSpace(name))
+                if (string.IsNullOrWhiteSpace(request.Name))
                     return BadRequest("Product name is required");
                     
-                if (price <= 0)
+                if (request.Price <= 0)
                     return BadRequest("Price must be greater than 0");
                     
-                if (categoryId <= 0)
+                if (request.CategoryId <= 0)
                     return BadRequest("Valid category ID is required");
 
                 // Validate main image if provided
-                if (mainImage != null)
+                if (request.MainImage != null)
                 {
                     var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp", "image/jpg" };
-                    if (!allowedTypes.Contains(mainImage.ContentType.ToLower()))
+                    if (!allowedTypes.Contains(request.MainImage.ContentType.ToLower()))
                         return BadRequest("Main image must be JPEG, PNG, or WebP format");
                         
-                    if (mainImage.Length > 5 * 1024 * 1024)
+                    if (request.MainImage.Length > 5 * 1024 * 1024)
                         return BadRequest("Main image size must be less than 5MB");
                 }
 
                 // Validate additional images if provided
-                if (additionalImages != null && additionalImages.Any())
+                if (request.AdditionalImages != null && request.AdditionalImages.Any())
                 {
-                    if (additionalImages.Count > 10)
+                    if (request.AdditionalImages.Count > 10)
                         return BadRequest("Maximum 10 additional images allowed");
 
                     var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp", "image/jpg" };
-                    foreach (var img in additionalImages)
+                    foreach (var img in request.AdditionalImages)
                     {
                         if (!allowedTypes.Contains(img.ContentType.ToLower()))
                             return BadRequest($"Image {img.FileName} must be JPEG, PNG, or WebP format");
@@ -348,20 +324,20 @@ namespace QueFarm.Server.Controllers
                 var productDto = new UpdateProductDto
                 {
                     Id = id,
-                    Name = name,
-                    Description = description,
-                    Price = price,
-                    OriginalPrice = originalPrice,
-                    CategoryId = categoryId,
-                    StockQuantity = stockQuantity,
-                    Origin = origin,
-                    Weight = weight,
-                    Region = region,
-                    IsActive = isActive
+                    Name = request.Name,
+                    Description = request.Description,
+                    Price = request.Price,
+                    OriginalPrice = request.OriginalPrice,
+                    CategoryId = request.CategoryId,
+                    StockQuantity = request.StockQuantity,
+                    Origin = request.Origin,
+                    Weight = request.Weight,
+                    Region = request.Region,
+                    IsActive = request.IsActive
                 };
 
                 // Update product with images
-                var product = await _productService.UpdateProductAsync(productDto, mainImage, additionalImages);
+                var product = await _productService.UpdateProductAsync(productDto, request.MainImage, request.AdditionalImages);
                 return Ok(product);
             }
             catch (KeyNotFoundException)

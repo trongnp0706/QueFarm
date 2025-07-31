@@ -117,15 +117,15 @@ namespace QueFarm.Server.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> UploadAdditionalImages(int productId, [FromForm] List<IFormFile> files)
+        public async Task<IActionResult> UploadAdditionalImages(int productId, [FromForm] UploadFilesRequest request)
         {
             try
             {
                 // Validate files
-                if (files == null || !files.Any())
+                if (request.Files == null || !request.Files.Any())
                     return BadRequest("No files provided");
 
-                if (files.Count > 10)
+                if (request.Files.Count > 10)
                     return BadRequest("Maximum 10 files allowed");
 
                 // Check if product exists
@@ -137,7 +137,7 @@ namespace QueFarm.Server.Controllers
                 var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp", "image/jpg" };
                 var validationErrors = new List<string>();
 
-                foreach (var file in files.Select((f, i) => new { File = f, Index = i }))
+                foreach (var file in request.Files.Select((f, i) => new { File = f, Index = i }))
                 {
                     if (file.File.Length == 0)
                         validationErrors.Add($"File {file.Index + 1}: Empty file");
@@ -150,7 +150,7 @@ namespace QueFarm.Server.Controllers
                 if (validationErrors.Any())
                     return BadRequest(new { errors = validationErrors });
 
-                var imageUrls = await _productService.SaveImagesAsync(files);
+                var imageUrls = await _productService.SaveImagesAsync(request.Files);
                 _logger.LogInformation("Uploaded {Count} additional images for product {ProductId}", imageUrls.Count, productId);
                 
                 // Update the product with the new additional images
@@ -188,7 +188,7 @@ namespace QueFarm.Server.Controllers
                     productId = productId,
                     uploadedCount = imageUrls.Count,
                     imageUrls = imageUrls,
-                    files = files.Select((f, i) => new {
+                    files = request.Files.Select((f, i) => new {
                         index = i,
                         fileName = f.FileName,
                         fileSize = f.Length,

@@ -52,7 +52,7 @@ builder.Services.AddSwaggerGen(c =>
     
     // Configure Swagger for clean documentation
     c.SupportNonNullableReferenceTypes();
-    c.SwaggerGeneratorOptions.DescribeAllParametersInCamelCase = true;
+    // c.SwaggerGeneratorOptions.DescribeAllParametersInCamelCase = true;
 });
 
 // Add DbContext

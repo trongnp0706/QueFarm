@@ -5,6 +5,25 @@ const API_BASE_URL = window.location.hostname === 'localhost'
   ? 'https://localhost:7013'
   : ''; // Use relative URL in production
 
+// Create axios instance with interceptor for authentication
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  }
+});
+
+// Add interceptor to automatically send auth token
+api.interceptors.request.use(config => {
+  const token = localStorage.getItem('adminToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Keep backward compatibility
 axios.defaults.baseURL = API_BASE_URL;
 
 const API_URL = '/api/product';
@@ -86,7 +105,7 @@ export const searchProducts = async (query) => {
 };
 
 export const createProduct = async (productData) => {
-  const response = await axios.post(API_URL, productData, {
+  const response = await api.post(API_URL, productData, {
     headers: {
       'Content-Type': 'application/json',
     },
@@ -119,7 +138,7 @@ export const updateProduct = async (id, productData) => {
 };
 
 export const deleteProduct = async (id) => {
-  return await axios.delete(`${API_URL}/${id}`);
+  return await api.delete(`${API_URL}/${id}`);
 };
 
 // File upload functions (Separate Controllers)
@@ -129,7 +148,7 @@ export const uploadMainImage = async (productId, imageFile) => {
   const formData = new FormData();
   formData.append('file', imageFile);
   
-  const response = await axios.post(`${FILE_API_URL}/${productId}/main-image`, formData, {
+  const response = await api.post(`${FILE_API_URL}/${productId}/main-image`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
@@ -144,7 +163,7 @@ export const uploadAdditionalImages = async (productId, imageFiles) => {
     formData.append('files', file);
   });
   
-  const response = await axios.post(`${FILE_API_URL}/${productId}/additional-images`, formData, {
+  const response = await api.post(`${FILE_API_URL}/${productId}/additional-images`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
@@ -154,7 +173,7 @@ export const uploadAdditionalImages = async (productId, imageFiles) => {
 };
 
 export const deleteProductImage = async (productId, imageUrl) => {
-  const response = await axios.delete(`${FILE_API_URL}/${productId}/image?imageUrl=${encodeURIComponent(imageUrl)}`);
+  const response = await api.delete(`${FILE_API_URL}/${productId}/image?imageUrl=${encodeURIComponent(imageUrl)}`);
   return response.data;
 };
 
@@ -234,7 +253,7 @@ export const createProductWithImagesDirect = async (productData, mainImage = nul
     });
   }
   
-  const response = await axios.post(`${API_URL}/with-images`, formData, {
+  const response = await api.post(`${API_URL}/with-images`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
@@ -270,7 +289,7 @@ export const updateProductWithImagesDirect = async (id, productData, mainImage =
     });
   }
   
-  const response = await axios.put(`${API_URL}/${id}/with-images`, formData, {
+  const response = await api.put(`${API_URL}/${id}/with-images`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
