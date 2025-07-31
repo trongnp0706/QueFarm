@@ -11,7 +11,11 @@ namespace QueFarm.Server.Application.Mappings
             // Product mappings
             CreateMap<Product, ProductDto>();
             CreateMap<CreateProductDto, Product>();
-            CreateMap<UpdateProductDto, Product>();
+            
+            // UpdateProductDto to Product mapping - EXCLUDE images to prevent overwriting
+            CreateMap<UpdateProductDto, Product>()
+                .ForMember(dest => dest.ImageUrl, opt => opt.Ignore())
+                .ForMember(dest => dest.AdditionalImages, opt => opt.Ignore());
             
             // Add more mappings for other entities as needed
         }

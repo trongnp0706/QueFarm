@@ -117,7 +117,7 @@ function ProductDetail() {
                   src={images[selectedImageIndex]} 
                   alt={product.name}
                   className="w-full h-96 rounded-lg shadow-md object-cover" 
-                  fallbackSrc="/placeholder.png"
+                  fallbackSrc="/images/placeholder.svg"
                 />
                 
                 {/* Navigation arrows */}
@@ -154,7 +154,7 @@ function ProductDetail() {
                         src={image} 
                         alt={`${product.name} ${index + 1}`}
                         className="w-full h-20 object-cover" 
-                        fallbackSrc="/placeholder.png"
+                        fallbackSrc="/images/placeholder.svg"
                       />
                       {selectedImageIndex === index && (
                         <div className="absolute inset-0 bg-green-600 bg-opacity-20"></div>

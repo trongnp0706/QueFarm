@@ -37,8 +37,8 @@ const getImageUrl = (product) => {
 
 // Helper function to handle image load errors
 const handleImageError = (e) => {
-  if (e.target.src !== '/placeholder.png') {
-    e.target.src = '/placeholder.png';
+  if (e.target.src !== '/images/placeholder.svg') {
+    e.target.src = '/images/placeholder.svg';
   }
 };
 

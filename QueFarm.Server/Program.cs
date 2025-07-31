@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Diagnostics;
 using System.Text;
 using QueFarm.Server.Core.Services;
 using QueFarm.Server.Application.Services;
@@ -21,7 +23,37 @@ builder.Services.AddControllers()
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new() { Title = "QueFarm API", Version = "v1" });
+    c.AddSecurityDefinition("Bearer", new()
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "JWT Authorization header using the Bearer scheme."
+    });
+    c.AddSecurityRequirement(new()
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+    
+    // Configure Swagger for clean documentation
+    c.SupportNonNullableReferenceTypes();
+    c.SwaggerGeneratorOptions.DescribeAllParametersInCamelCase = true;
+});
 
 // Add DbContext
 builder.Services.AddDbContext<QueFarmDbContext>(options =>
@@ -68,20 +100,63 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = jwtSettings["Issuer"],
         ValidAudience = jwtSettings["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey is required")))
     };
 });
 
 var app = builder.Build();
 
 app.UseDefaultFiles();
-app.UseStaticFiles(); // Serve static files from wwwroot
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        // Set cache headers for images
+        if (ctx.Context.Request.Path.StartsWithSegments("/images"))
+        {
+            ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=604800"); // 7 days
+        }
+    }
+}); // Serve static files from wwwroot with caching
 
 // Configure the HTTP request pipeline.
+// Global exception handler
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        context.Response.StatusCode = 500;
+        context.Response.ContentType = "application/json";
+        
+        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+        var exceptionHandlerFeature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
+        
+        if (exceptionHandlerFeature != null)
+        {
+            logger.LogError(exceptionHandlerFeature.Error, "An error occurred: {ErrorMessage}", exceptionHandlerFeature.Error.Message);
+            
+            var response = new { 
+                error = "An error occurred while processing your request.",
+                details = app.Environment.IsDevelopment() ? exceptionHandlerFeature.Error.Message : null
+            };
+            
+            await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(response));
+        }
+    });
+});
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "QueFarm API V1");
+        c.RoutePrefix = "swagger";
+        c.DisplayRequestDuration();
+        c.EnableTryItOutByDefault();
+        c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.None);
+        c.DefaultModelsExpandDepth(-1);
+    });
 }
 
 app.UseHttpsRedirection();

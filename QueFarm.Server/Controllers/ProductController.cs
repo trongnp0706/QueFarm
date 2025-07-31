@@ -79,10 +79,18 @@ namespace QueFarm.Server.Controllers
             return Ok(products);
         }
 
-        // POST: api/product (Admin)
+        /// <summary>
+        /// Create a new product with JSON data only
+        /// For image uploads, use the /api/product-files endpoints after creating the product or use the form-data endpoint below
+        /// </summary>
+        /// <param name="productDto">Product data</param>
+        /// <returns>Created product</returns>
         [HttpPost]
-        // [Authorize] // Temporarily disabled for testing
-        public async Task<IActionResult> Create([FromForm] CreateProductDto productDto, [FromForm] IFormFile? mainImage, [FromForm] List<IFormFile>? additionalImages)
+        [ProducesResponseType(typeof(ProductDto), 201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
+        [Authorize]
+        public async Task<IActionResult> Create([FromBody] CreateProductDto productDto)
         {
             try
             {
@@ -96,19 +104,137 @@ namespace QueFarm.Server.Controllers
                 if (productDto.CategoryId <= 0)
                     return BadRequest("Valid category ID is required");
                 
-                var product = await _productService.CreateProductAsync(productDto, mainImage, additionalImages);
-            return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
+                var product = await _productService.CreateProductAsync(productDto, null, null);
+                return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, new { 
+                    error = "Internal server error", 
+                    message = ex.Message
+                });
             }
         }
 
-        // PUT: api/product/{id} (Admin)
+        /// <summary>
+        /// Create a new product with form data including image uploads
+        /// This endpoint supports both product data and file uploads in a single request
+        /// </summary>
+        /// <param name="name">Product name</param>
+        /// <param name="description">Product description</param>
+        /// <param name="price">Product price</param>
+        /// <param name="originalPrice">Original price (optional)</param>
+        /// <param name="categoryId">Category ID</param>
+        /// <param name="stockQuantity">Stock quantity</param>
+        /// <param name="origin">Product origin</param>
+        /// <param name="weight">Product weight</param>
+        /// <param name="region">Product region</param>
+        /// <param name="mainImage">Main product image (optional)</param>
+        /// <param name="additionalImages">Additional product images (optional)</param>
+        /// <returns>Created product</returns>
+        [HttpPost("with-images")]
+        [Consumes("multipart/form-data")]
+        [ProducesResponseType(typeof(ProductDto), 201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
+        [Authorize]
+        public async Task<IActionResult> CreateWithImages(
+            [FromForm, Required] string name,
+            [FromForm, Required] decimal price,
+            [FromForm, Required] int categoryId,
+            [FromForm] string? description = null,
+            [FromForm] decimal? originalPrice = null,
+            [FromForm] int stockQuantity = 0,
+            [FromForm] string? origin = null,
+            [FromForm] string? weight = null,
+            [FromForm] string? region = null,
+            [FromForm] IFormFile? mainImage = null,
+            [FromForm] List<IFormFile>? additionalImages = null)
+        {
+            try
+            {
+                // Validate input data
+                if (string.IsNullOrWhiteSpace(name))
+                    return BadRequest("Product name is required");
+                    
+                if (price <= 0)
+                    return BadRequest("Price must be greater than 0");
+                    
+                if (categoryId <= 0)
+                    return BadRequest("Valid category ID is required");
+
+                // Validate main image if provided
+                if (mainImage != null)
+                {
+                    var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp", "image/jpg" };
+                    if (!allowedTypes.Contains(mainImage.ContentType.ToLower()))
+                        return BadRequest("Main image must be JPEG, PNG, or WebP format");
+                        
+                    if (mainImage.Length > 5 * 1024 * 1024)
+                        return BadRequest("Main image size must be less than 5MB");
+                }
+
+                // Validate additional images if provided
+                if (additionalImages != null && additionalImages.Any())
+                {
+                    if (additionalImages.Count > 10)
+                        return BadRequest("Maximum 10 additional images allowed");
+
+                    var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp", "image/jpg" };
+                    foreach (var img in additionalImages)
+                    {
+                        if (!allowedTypes.Contains(img.ContentType.ToLower()))
+                            return BadRequest($"Image {img.FileName} must be JPEG, PNG, or WebP format");
+                            
+                        if (img.Length > 5 * 1024 * 1024)
+                            return BadRequest($"Image {img.FileName} size must be less than 5MB");
+                    }
+                }
+
+                // Create CreateProductDto from form data
+                var productDto = new CreateProductDto
+                {
+                    Name = name,
+                    Description = description,
+                    Price = price,
+                    OriginalPrice = originalPrice,
+                    CategoryId = categoryId,
+                    StockQuantity = stockQuantity,
+                    Origin = origin,
+                    Weight = weight,
+                    Region = region
+                };
+
+                // Create product with images
+                var product = await _productService.CreateProductAsync(productDto, mainImage, additionalImages);
+                return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { 
+                    error = "Internal server error", 
+                    message = ex.Message,
+                    details = ex.InnerException?.Message
+                });
+            }
+        }
+
+
+
+        /// <summary>
+        /// Update an existing product with JSON data only
+        /// For image uploads, use the /api/product-files endpoints or the form-data endpoint below
+        /// </summary>
+        /// <param name="id">Product ID</param>
+        /// <param name="productDto">Updated product data</param>
+        /// <returns>Updated product</returns>
         [HttpPut("{id:int}")]
-        // [Authorize] // Temporarily disabled for testing
-        public async Task<IActionResult> Update(int id, [FromForm] UpdateProductDto productDto, [FromForm] IFormFile? mainImage, [FromForm] List<IFormFile>? additionalImages)
+        [ProducesResponseType(typeof(ProductDto), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        [Authorize]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateProductDto productDto)
         {
             if (id != productDto.Id) 
                 return BadRequest("ID mismatch");
@@ -125,7 +251,7 @@ namespace QueFarm.Server.Controllers
                 if (productDto.CategoryId <= 0)
                     return BadRequest("Valid category ID is required");
                 
-                var product = await _productService.UpdateProductAsync(productDto, mainImage, additionalImages);
+                var product = await _productService.UpdateProductAsync(productDto, null, null);
                 return Ok(product);
             }
             catch (KeyNotFoundException)
@@ -138,9 +264,123 @@ namespace QueFarm.Server.Controllers
             }
         }
 
+        /// <summary>
+        /// Update an existing product with form data including image uploads
+        /// This endpoint supports both product data and file uploads in a single request
+        /// </summary>
+        /// <param name="id">Product ID</param>
+        /// <param name="name">Product name</param>
+        /// <param name="description">Product description</param>
+        /// <param name="price">Product price</param>
+        /// <param name="originalPrice">Original price (optional)</param>
+        /// <param name="categoryId">Category ID</param>
+        /// <param name="stockQuantity">Stock quantity</param>
+        /// <param name="origin">Product origin</param>
+        /// <param name="weight">Product weight</param>
+        /// <param name="region">Product region</param>
+        /// <param name="isActive">Is product active</param>
+        /// <param name="mainImage">Main product image (optional)</param>
+        /// <param name="additionalImages">Additional product images (optional)</param>
+        /// <returns>Updated product</returns>
+        [HttpPut("{id:int}/with-images")]
+        [Consumes("multipart/form-data")]
+        [ProducesResponseType(typeof(ProductDto), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        [Authorize]
+        public async Task<IActionResult> UpdateWithImages(
+            int id,
+            [FromForm, Required] string name,
+            [FromForm, Required] decimal price,
+            [FromForm, Required] int categoryId,
+            [FromForm] string? description = null,
+            [FromForm] decimal? originalPrice = null,
+            [FromForm] int stockQuantity = 0,
+            [FromForm] string? origin = null,
+            [FromForm] string? weight = null,
+            [FromForm] string? region = null,
+            [FromForm] bool isActive = true,
+            [FromForm] IFormFile? mainImage = null,
+            [FromForm] List<IFormFile>? additionalImages = null)
+        {
+            try
+            {
+                // Validate input data
+                if (string.IsNullOrWhiteSpace(name))
+                    return BadRequest("Product name is required");
+                    
+                if (price <= 0)
+                    return BadRequest("Price must be greater than 0");
+                    
+                if (categoryId <= 0)
+                    return BadRequest("Valid category ID is required");
+
+                // Validate main image if provided
+                if (mainImage != null)
+                {
+                    var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp", "image/jpg" };
+                    if (!allowedTypes.Contains(mainImage.ContentType.ToLower()))
+                        return BadRequest("Main image must be JPEG, PNG, or WebP format");
+                        
+                    if (mainImage.Length > 5 * 1024 * 1024)
+                        return BadRequest("Main image size must be less than 5MB");
+                }
+
+                // Validate additional images if provided
+                if (additionalImages != null && additionalImages.Any())
+                {
+                    if (additionalImages.Count > 10)
+                        return BadRequest("Maximum 10 additional images allowed");
+
+                    var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp", "image/jpg" };
+                    foreach (var img in additionalImages)
+                    {
+                        if (!allowedTypes.Contains(img.ContentType.ToLower()))
+                            return BadRequest($"Image {img.FileName} must be JPEG, PNG, or WebP format");
+                            
+                        if (img.Length > 5 * 1024 * 1024)
+                            return BadRequest($"Image {img.FileName} size must be less than 5MB");
+                    }
+                }
+
+                // Create UpdateProductDto from form data
+                var productDto = new UpdateProductDto
+                {
+                    Id = id,
+                    Name = name,
+                    Description = description,
+                    Price = price,
+                    OriginalPrice = originalPrice,
+                    CategoryId = categoryId,
+                    StockQuantity = stockQuantity,
+                    Origin = origin,
+                    Weight = weight,
+                    Region = region,
+                    IsActive = isActive
+                };
+
+                // Update product with images
+                var product = await _productService.UpdateProductAsync(productDto, mainImage, additionalImages);
+                return Ok(product);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { 
+                    error = "Internal server error", 
+                    message = ex.Message,
+                    details = ex.InnerException?.Message
+                });
+            }
+        }
+
         // DELETE: api/product/{id} (Admin)
         [HttpDelete("{id:int}")]
-        // [Authorize] // Temporarily disabled for testing
+        [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
             try

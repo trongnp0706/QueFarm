@@ -6,6 +6,7 @@ import {
 import { InboxOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import categoryService from '../../../services/categoryService';
+import { createProductWithImagesDirect } from '../../../services/productService';
 import ImageFallback from '../../../components/ImageFallback';
 import { compressImage, compressImages } from '../../../utils/imageCompression';
 
@@ -43,11 +44,10 @@ const AddProduct = () => {
     }
     
     if (info.file.status === 'done' || info.file.status === 'error') {
-      // Get file object
       const file = info.file.originFileObj;
       
       try {
-        // Nén ảnh nếu kích thước lớn hơn 1MB
+        // Compress image if larger than 1MB
         if (file.size > 1024 * 1024) {
           message.info('Ảnh đang được nén để tải lên nhanh hơn...');
           const compressedFile = await compressImage(file);
@@ -73,7 +73,7 @@ const AddProduct = () => {
         console.error('Error compressing image:', error);
         message.error('Có lỗi khi xử lý ảnh');
         
-        // Sử dụng file gốc nếu có lỗi
+        // Use original file if error
         setMainImageFile(file);
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -87,17 +87,16 @@ const AddProduct = () => {
   const handleAdditionalImagesChange = async (info) => {
     const fileList = info.fileList;
     
-    // Get file objects
     const files = fileList.map(file => file.originFileObj);
     
     try {
-      // Nén tất cả các ảnh lớn hơn 1MB
-      const filesToCompress = files.filter(file => file && file.size > 1024 * 1024);
-      
-      if (filesToCompress.length > 0) {
-        message.info('Các ảnh bổ sung đang được nén để tải lên nhanh hơn...');
+              // Compress all images larger than 1MB
+        const filesToCompress = files.filter(file => file && file.size > 1024 * 1024);
         
-        // Nén các ảnh lớn
+        if (filesToCompress.length > 0) {
+          message.info('Các ảnh bổ sung đang được nén để tải lên nhanh hơn...');
+          
+          // Compress large images
         const compressedFiles = await compressImages(filesToCompress);
         
         // Thay thế các file gốc bằng các file đã nén
@@ -115,7 +114,7 @@ const AddProduct = () => {
       console.error('Error compressing images:', error);
       message.error('Có lỗi khi xử lý ảnh');
       
-      // Sử dụng file gốc nếu có lỗi
+      // Use original files if error
       setAdditionalImageFiles(files);
     }
   };
@@ -124,46 +123,11 @@ const AddProduct = () => {
     setLoading(true);
     
     try {
-      const formDataToSend = new FormData();
-      
-      // Add all form fields, including required ones
-      formDataToSend.append('name', values.name);
-      formDataToSend.append('price', values.price);
-      formDataToSend.append('categoryId', values.categoryId);
-      formDataToSend.append('stockQuantity', values.stockQuantity);
-      formDataToSend.append('isActive', values.isActive !== undefined ? values.isActive : true);
-      
-      // Add optional fields only if they have values
-      if (values.originalPrice) formDataToSend.append('originalPrice', values.originalPrice);
-      if (values.description) formDataToSend.append('description', values.description);
-      if (values.origin) formDataToSend.append('origin', values.origin);
-      if (values.weight) formDataToSend.append('weight', values.weight);
-      if (values.region) formDataToSend.append('region', values.region);
-      
-      // Append main image if it exists
-      if (mainImageFile) {
-        formDataToSend.append('mainImage', mainImageFile);
-      }
-      
-      // Append additional images if they exist
-      if (additionalImageFiles && additionalImageFiles.length > 0) {
-        additionalImageFiles.forEach(image => {
-          formDataToSend.append('additionalImages', image);
-        });
-      }
 
-      const response = await fetch('https://localhost:7013/api/product', {
-        method: 'POST',
-        body: formDataToSend
-      });
-
-      if (response.ok) {
-        message.success('Thêm sản phẩm thành công');
-        navigate('/admin/products');
-      } else {
-        const error = await response.text();
-        throw new Error(error);
-      }
+      
+      await createProductWithImagesDirect(values, mainImageFile, additionalImageFiles);
+      message.success('Thêm sản phẩm thành công');
+      navigate('/admin/products');
     } catch (error) {
       message.error('Không thể thêm sản phẩm: ' + error.message);
       console.error('Failed to create product:', error);

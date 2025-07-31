@@ -85,64 +85,33 @@ export const searchProducts = async (query) => {
   return response.data;
 };
 
-export const createProduct = async (productData, mainImage, additionalImages = []) => {
-  const formData = new FormData();
-  
-  // Append product data, only non-empty values
-  Object.keys(productData).forEach(key => {
-    const value = productData[key];
-    if (value !== null && value !== undefined && value !== '') {
-      formData.append(key, value);
-    }
-  });
-  
-  // Append main image if it exists
-  if (mainImage) {
-    formData.append('mainImage', mainImage);
-  }
-  
-  // Append additional images if they exist
-  if (additionalImages && additionalImages.length > 0) {
-    additionalImages.forEach(image => {
-      formData.append('additionalImages', image);
-    });
-  }
-  
-  const response = await axios.post(API_URL, formData, {
+export const createProduct = async (productData) => {
+  const response = await axios.post(API_URL, productData, {
     headers: {
-      'Content-Type': 'multipart/form-data',
+      'Content-Type': 'application/json',
     },
   });
   
   return response.data;
 };
 
-export const updateProduct = async (id, productData, mainImage, additionalImages = []) => {
-  const formData = new FormData();
-  
-  // Append product data, only non-empty values
-  Object.keys(productData).forEach(key => {
-    const value = productData[key];
-    if (value !== null && value !== undefined && value !== '') {
-      formData.append(key, value);
-    }
-  });
-  
-  // Append main image if it exists
-  if (mainImage) {
-    formData.append('mainImage', mainImage);
-  }
-  
-  // Append additional images if they exist
-  if (additionalImages && additionalImages.length > 0) {
-    additionalImages.forEach(image => {
-      formData.append('additionalImages', image);
-    });
-  }
-  
-  const response = await axios.put(`${API_URL}/${id}`, formData, {
+export const updateProduct = async (id, productData) => {
+  const updateData = {
+    id: parseInt(id),
+    name: productData.name,
+    price: parseFloat(productData.price),
+    categoryId: parseInt(productData.categoryId),
+    description: productData.description || '',
+    stockQuantity: parseInt(productData.stockQuantity) || 0,
+    origin: productData.origin || '',
+    weight: productData.weight || '',
+    region: productData.region || '',
+    isActive: productData.isActive !== undefined ? productData.isActive : true
+  };
+
+  const response = await axios.put(`${API_URL}/${id}`, updateData, {
     headers: {
-      'Content-Type': 'multipart/form-data',
+      'Content-Type': 'application/json',
     },
   });
   
@@ -151,6 +120,163 @@ export const updateProduct = async (id, productData, mainImage, additionalImages
 
 export const deleteProduct = async (id) => {
   return await axios.delete(`${API_URL}/${id}`);
+};
+
+// File upload functions (Separate Controllers)
+const FILE_API_URL = '/api/product-files';
+
+export const uploadMainImage = async (productId, imageFile) => {
+  const formData = new FormData();
+  formData.append('file', imageFile);
+  
+  const response = await axios.post(`${FILE_API_URL}/${productId}/main-image`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  
+  return response.data;
+};
+
+export const uploadAdditionalImages = async (productId, imageFiles) => {
+  const formData = new FormData();
+  imageFiles.forEach(file => {
+    formData.append('files', file);
+  });
+  
+  const response = await axios.post(`${FILE_API_URL}/${productId}/additional-images`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  
+  return response.data;
+};
+
+export const deleteProductImage = async (productId, imageUrl) => {
+  const response = await axios.delete(`${FILE_API_URL}/${productId}/image?imageUrl=${encodeURIComponent(imageUrl)}`);
+  return response.data;
+};
+
+// Helper functions (Combines data + file operations)
+export const createProductWithImages = async (productData, mainImage = null, additionalImages = []) => {
+  // 1. Create product with JSON data first
+  const product = await createProduct(productData);
+  
+  try {
+    // 2. Upload main image if provided
+    if (mainImage) {
+      await uploadMainImage(product.id, mainImage);
+    }
+    
+    // 3. Upload additional images if provided
+    if (additionalImages && additionalImages.length > 0) {
+      await uploadAdditionalImages(product.id, additionalImages);
+    }
+    
+    // 4. Return updated product data
+    return await getProductById(product.id);
+  } catch (error) {
+    console.error('Error uploading images:', error);
+    // Product created but image upload failed
+    throw new Error(`Product created successfully but image upload failed: ${error.message}`);
+  }
+};
+
+export const updateProductWithImages = async (id, productData, mainImage = null, additionalImages = []) => {
+  // 1. Update product data first
+  const product = await updateProduct(id, productData);
+  
+  try {
+    // 2. Upload main image if provided
+    if (mainImage) {
+      await uploadMainImage(id, mainImage);
+    }
+    
+    // 3. Upload additional images if provided
+    if (additionalImages && additionalImages.length > 0) {
+      await uploadAdditionalImages(id, additionalImages);
+    }
+    
+    // 4. Return updated product data
+    return await getProductById(id);
+  } catch (error) {
+    console.error('Error uploading images:', error);
+    // Product updated but image upload failed
+    throw new Error(`Product updated successfully but image upload failed: ${error.message}`);
+  }
+};
+
+// New endpoints with direct image upload (Integrated)
+export const createProductWithImagesDirect = async (productData, mainImage = null, additionalImages = []) => {
+  const formData = new FormData();
+  
+  // Add product data
+  formData.append('name', productData.name);
+  formData.append('price', productData.price);
+  formData.append('categoryId', productData.categoryId);
+  
+  if (productData.description) formData.append('description', productData.description);
+  if (productData.originalPrice) formData.append('originalPrice', productData.originalPrice);
+  if (productData.stockQuantity) formData.append('stockQuantity', productData.stockQuantity);
+  if (productData.origin) formData.append('origin', productData.origin);
+  if (productData.weight) formData.append('weight', productData.weight);
+  if (productData.region) formData.append('region', productData.region);
+  
+  // Add images
+  if (mainImage) {
+    formData.append('mainImage', mainImage);
+  }
+  
+  if (additionalImages && additionalImages.length > 0) {
+    additionalImages.forEach(image => {
+      formData.append('additionalImages', image);
+    });
+  }
+  
+  const response = await axios.post(`${API_URL}/with-images`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  
+  return response.data;
+};
+
+export const updateProductWithImagesDirect = async (id, productData, mainImage = null, additionalImages = []) => {
+  const formData = new FormData();
+  
+  // Add product data
+  formData.append('name', productData.name);
+  formData.append('price', productData.price);
+  formData.append('categoryId', productData.categoryId);
+  
+  if (productData.description) formData.append('description', productData.description);
+  if (productData.originalPrice) formData.append('originalPrice', productData.originalPrice);
+  if (productData.stockQuantity) formData.append('stockQuantity', productData.stockQuantity);
+  if (productData.origin) formData.append('origin', productData.origin);
+  if (productData.weight) formData.append('weight', productData.weight);
+  if (productData.region) formData.append('region', productData.region);
+  formData.append('isActive', productData.isActive !== undefined ? productData.isActive : true);
+  
+  // Add images
+  if (mainImage) {
+    formData.append('mainImage', mainImage);
+  }
+  
+  if (additionalImages && additionalImages.length > 0) {
+    additionalImages.forEach(image => {
+      formData.append('additionalImages', image);
+    });
+  }
+  
+  const response = await axios.put(`${API_URL}/${id}/with-images`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  
+  return response.data;
 };
 
 const productService = {
@@ -162,7 +288,17 @@ const productService = {
   searchProducts,
   createProduct,
   updateProduct,
-  deleteProduct
+  deleteProduct,
+  // File upload functions (Solution 2)
+  uploadMainImage,
+  uploadAdditionalImages,
+  deleteProductImage,
+  // Helper functions (Combined operations)
+  createProductWithImages,
+  updateProductWithImages,
+  // New direct image upload functions
+  createProductWithImagesDirect,
+  updateProductWithImagesDirect
 };
 
 export default productService; 

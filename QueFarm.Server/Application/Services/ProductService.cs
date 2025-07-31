@@ -6,6 +6,7 @@ using QueFarm.Server.Core.Domain.Interfaces;
 using QueFarm.Server.Core.DTOs;
 using QueFarm.Server.Core.Services;
 using System.IO;
+using System.Linq;
 
 namespace QueFarm.Server.Application.Services
 {
@@ -32,6 +33,11 @@ namespace QueFarm.Server.Application.Services
         public async Task<ProductDto> CreateProductAsync(CreateProductDto productDto, IFormFile? mainImage, List<IFormFile>? additionalImages)
         {
             var product = _mapper.Map<Product>(productDto);
+            
+            // Set default values to prevent database errors
+            product.CreatedAt = DateTime.UtcNow;
+            product.UpdatedAt = null;
+            product.AdditionalImages = new List<string>(); // Initialize as empty list
             
             // Calculate discount if original price is provided
             if (productDto.OriginalPrice.HasValue && productDto.OriginalPrice > 0)
@@ -229,11 +235,19 @@ namespace QueFarm.Server.Application.Services
             if (product == null)
                 throw new KeyNotFoundException($"Product with id {productDto.Id} not found");
 
+            // Store references to old images for cleanup
             var oldMainImage = product.ImageUrl;
             var oldAdditionalImages = product.AdditionalImages?.ToList() ?? new List<string>();
 
+            // Map basic product info (images are excluded by AutoMapper configuration)
             _mapper.Map(productDto, product);
             product.UpdatedAt = DateTime.UtcNow;
+            
+            // Ensure AdditionalImages is never null
+            if (product.AdditionalImages == null)
+            {
+                product.AdditionalImages = new List<string>();
+            }
 
             // Calculate discount if original price is provided
             if (productDto.OriginalPrice.HasValue && productDto.OriginalPrice > 0)
@@ -257,8 +271,19 @@ namespace QueFarm.Server.Application.Services
                 
                 product.ImageUrl = await SaveImageAsync(mainImage);
             }
+            // Handle explicit image URL update from DTO (for direct URL updates)
+            else if (!string.IsNullOrEmpty(productDto.ImageUrl) && productDto.ImageUrl != oldMainImage)
+            {
+                // If DTO has a different image URL than current, update it
+                // Delete old image only if it's a file path (not external URL)
+                if (!string.IsNullOrEmpty(oldMainImage) && oldMainImage.StartsWith("/images/"))
+                {
+                    await DeleteImageAsync(oldMainImage);
+                }
+                product.ImageUrl = productDto.ImageUrl;
+            }
 
-            // Handle additional images upload if new ones are provided
+            // Handle additional images upload if new ones are provided  
             if (additionalImages != null && additionalImages.Any())
             {
                 // Delete old additional images if they exist
@@ -271,6 +296,19 @@ namespace QueFarm.Server.Application.Services
                 }
                 
                 product.AdditionalImages = await SaveImagesAsync(additionalImages);
+            }
+            // Handle explicit additional images update from DTO
+            else if (productDto.AdditionalImages != null && 
+                     !productDto.AdditionalImages.SequenceEqual(oldAdditionalImages))
+            {
+                // If DTO has different additional images, update them
+                // Delete old images only if they are file paths (not external URLs)
+                var toDelete = oldAdditionalImages.Where(img => img.StartsWith("/images/")).ToList();
+                foreach (var oldImageUrl in toDelete)
+                {
+                    await DeleteImageAsync(oldImageUrl);
+                }
+                product.AdditionalImages = productDto.AdditionalImages;
             }
 
             await _productRepository.UpdateAsync(product);
@@ -301,10 +339,23 @@ namespace QueFarm.Server.Application.Services
             var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(image.FileName)}";
             var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-            // Save the file
-            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            try
             {
-                await image.CopyToAsync(fileStream);
+                // Save the file
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await image.CopyToAsync(fileStream);
+                }
+                
+                // Verify file was created successfully
+                if (!File.Exists(filePath))
+                {
+                    throw new InvalidOperationException("File was not created successfully");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Error saving image file: {ex.Message}", ex);
             }
 
             // Return the relative path

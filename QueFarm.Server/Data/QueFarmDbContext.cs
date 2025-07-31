@@ -56,7 +56,11 @@ namespace QueFarm.Server.Data
                 .HasConversion(
                     v => v == null ? null : string.Join(';', v),
                     v => v == null ? new List<string>() : v.Split(';', StringSplitOptions.RemoveEmptyEntries).ToList()
-                );
+                )
+                .Metadata.SetValueComparer(new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<List<string>>(
+                    (c1, c2) => c1!.SequenceEqual(c2!),
+                    c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                    c => c.ToList()));
                 
             modelBuilder.Entity<OrderItem>()
                 .HasOne(oi => oi.Order)

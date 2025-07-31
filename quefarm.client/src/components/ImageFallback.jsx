@@ -14,7 +14,7 @@ const resolveImageUrl = (src) => {
   if (src.startsWith('/')) {
     const API_BASE_URL = window.location.hostname === 'localhost' 
       ? 'https://localhost:7013'
-      : ''; // Use relative URL in production
+      : '';
     return `${API_BASE_URL}${src}`;
   }
   
@@ -22,7 +22,7 @@ const resolveImageUrl = (src) => {
   return src;
 };
 
-const ImageFallback = ({ src, alt, fallbackSrc = '/logo.png', style, width, height, debug = false, ...props }) => {
+const ImageFallback = ({ src, alt, fallbackSrc = '/images/placeholder.svg', style, width, height, debug = false, ...props }) => {
   const [imageError, setImageError] = useState(false);
   const resolvedSrc = resolveImageUrl(src);
   const resolvedFallbackSrc = resolveImageUrl(fallbackSrc);

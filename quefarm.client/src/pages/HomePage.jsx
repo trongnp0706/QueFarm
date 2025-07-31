@@ -50,7 +50,7 @@ function ProductSection({ title, products, viewAllLink, loading = false }) {
                       src={product.imageUrl} 
                       alt={product.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                      fallbackSrc="/placeholder.png"
+                      fallbackSrc="/images/placeholder.svg"
                     />
                   </div>
                   <div className="p-3">
@@ -214,7 +214,7 @@ function HomePage() {
         
         // Process products to ensure correct format
         const processedAllProducts = allProducts.map(product => {
-          console.log('HomePage: Processing product for images:', product.name, product);
+  
           
           // Try to get image URL from various possible properties
           let finalImageUrl = '/placeholder.png';
@@ -246,7 +246,7 @@ function HomePage() {
             finalImageUrl = firstImage.imageUrl || firstImage.ImageUrl;
           }
           
-          console.log('HomePage: Final image URL for', product.name, ':', finalImageUrl);
+          
           
           return {
             ...product,

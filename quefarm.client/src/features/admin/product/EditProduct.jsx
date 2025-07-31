@@ -5,7 +5,7 @@ import {
 } from 'antd';
 import { InboxOutlined, ArrowLeftOutlined, EyeOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getProductById, updateProduct } from '../../../services/productService';
+import { getProductById, updateProductWithImagesDirect } from '../../../services/productService';
 import { getAllCategories } from '../../../services/categoryService';
 import ImageFallback from '../../../components/ImageFallback';
 import { compressImage, compressImages } from '../../../utils/imageCompression';
@@ -15,10 +15,9 @@ const { TextArea } = Input;
 const { Dragger } = Upload;
 const { Option } = Select;
 
-// Get API base URL for image paths
 const API_BASE_URL = window.location.hostname === 'localhost' 
   ? 'https://localhost:7013'
-  : ''; // Use relative URL in production
+  : '';
 
 const EditProduct = () => {
   const { id } = useParams();
@@ -69,16 +68,16 @@ const EditProduct = () => {
             name: img.split('/').pop() || 'image',
             status: 'done',
             url: getFullImageUrl(img),
-            path: img // Lưu đường dẫn gốc
+            path: img
           }));
           setAdditionalImagePreviews(fullUrlAdditionalImages);
         }
 
-        // Set form values - Quan trọng: Đảm bảo lưu cả đường dẫn ảnh vào form
+        // Set form values
         form.setFieldsValue({
           ...productData,
-          originalImageUrl: productData.imageUrl, // Lưu đường dẫn ảnh chính gốc
-          originalAdditionalImages: productData.additionalImages // Lưu đường dẫn ảnh bổ sung gốc
+          originalImageUrl: productData.imageUrl,
+          originalAdditionalImages: productData.additionalImages
         });
         
         // Fetch categories
@@ -101,11 +100,10 @@ const EditProduct = () => {
     }
     
     if (info.file.status === 'done' || info.file.status === 'error') {
-      // Get file object
       const file = info.file.originFileObj;
       
       try {
-        // Nén ảnh nếu kích thước lớn hơn 1MB
+        // Compress image if larger than 1MB
         if (file.size > 1024 * 1024) {
           message.info('Ảnh đang được nén để tải lên nhanh hơn...');
           const compressedFile = await compressImage(file);
@@ -131,7 +129,7 @@ const EditProduct = () => {
         console.error('Error compressing image:', error);
         message.error('Có lỗi khi xử lý ảnh');
         
-        // Sử dụng file gốc nếu có lỗi
+        // Use original file if error
         setMainImageFile(file);
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -147,16 +145,16 @@ const EditProduct = () => {
     const newFiles = fileList.filter(file => file.originFileObj).map(file => file.originFileObj);
     
     try {
-      // Nén tất cả các ảnh lớn hơn 1MB
+      // Compress all images larger than 1MB
       const filesToCompress = newFiles.filter(file => file.size > 1024 * 1024);
       
       if (filesToCompress.length > 0) {
         message.info('Các ảnh đang được nén để tải lên nhanh hơn...');
         
-        // Nén các ảnh lớn
+        // Compress large images
         const compressedFiles = await compressImages(filesToCompress);
         
-        // Thay thế các file gốc bằng các file đã nén
+        // Replace original files with compressed ones
         const finalFiles = newFiles.map(file => {
           const compressedFile = compressedFiles.find(cf => cf.name === file.name);
           return compressedFile || file;
@@ -194,7 +192,7 @@ const EditProduct = () => {
       console.error('Error compressing images:', error);
       message.error('Có lỗi khi xử lý ảnh');
       
-      // Sử dụng file gốc nếu có lỗi
+      // Use original files if error
       setAdditionalImageFiles(newFiles);
       
       // Generate previews for original files
@@ -229,30 +227,13 @@ const EditProduct = () => {
     setLoading(true);
     
     try {
-      // Đảm bảo đường dẫn ảnh cũ được giữ nguyên khi không có ảnh mới
-      // Đảm bảo imageUrl có giá trị từ originalImageUrl
-      if (!values.imageUrl && values.originalImageUrl) {
-        values.imageUrl = values.originalImageUrl;
-      }
 
-      // Đảm bảo additionalImages có giá trị từ originalAdditionalImages
-      if ((!values.additionalImages || values.additionalImages.length === 0) && values.originalAdditionalImages) {
-        values.additionalImages = values.originalAdditionalImages;
-      }
       
-      console.log('Submitting form with values:', values);
-      
-      // Chỉ gửi ảnh mới nếu người dùng đã thay đổi ảnh
-      const mainImageToUpload = mainImageFile; // Nếu null, server sẽ giữ ảnh cũ
-      
-      // Chỉ gửi ảnh bổ sung nếu người dùng đã thay đổi
-      const additionalImagesToUpload = additionalImageFiles.length > 0 ? additionalImageFiles : null;
-      
-      await updateProduct(id, values, mainImageToUpload, additionalImagesToUpload);
+      await updateProductWithImagesDirect(id, values, mainImageFile, additionalImageFiles);
       message.success('Cập nhật sản phẩm thành công');
       navigate('/admin/products');
     } catch (error) {
-      message.error('Không thể cập nhật sản phẩm');
+      message.error('Không thể cập nhật sản phẩm: ' + error.message);
       console.error('Failed to update product:', error);
     } finally {
       setLoading(false);
