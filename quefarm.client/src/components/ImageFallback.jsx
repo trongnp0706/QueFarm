@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Image } from 'antd';
+import { FaImage } from 'react-icons/fa';
 
 // Helper function to resolve image URL
 const resolveImageUrl = (src) => {
@@ -22,7 +23,7 @@ const resolveImageUrl = (src) => {
   return src;
 };
 
-const ImageFallback = ({ src, alt, fallbackSrc = '/images/placeholder.svg', style, width, height, debug = false, ...props }) => {
+const ImageFallback = ({ src, alt, fallbackSrc = '/images/placeholder.svg', style, width, height, debug = false, className, ...props }) => {
   const [imageError, setImageError] = useState(false);
   const resolvedSrc = resolveImageUrl(src);
   const resolvedFallbackSrc = resolveImageUrl(fallbackSrc);
@@ -49,6 +50,18 @@ const ImageFallback = ({ src, alt, fallbackSrc = '/images/placeholder.svg', styl
     }
   }, [src, currentSrc, imageError, debug]);
 
+  // If image failed to load, show custom placeholder
+  if (imageError || !currentSrc) {
+    return (
+      <div className={`product-image-placeholder ${className || ''}`}>
+        <div className="text-center">
+          <FaImage className="mx-auto mb-2 text-4xl text-gray-400" />
+          <p className="text-sm text-gray-500">Không có ảnh</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Image
       src={currentSrc || resolvedFallbackSrc}
@@ -62,6 +75,7 @@ const ImageFallback = ({ src, alt, fallbackSrc = '/images/placeholder.svg', styl
       onLoad={handleLoad}
       fallback={resolvedFallbackSrc}
       preview={false}
+      className={className}
       {...props}
     />
   );
