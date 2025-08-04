@@ -12,7 +12,6 @@
 # User-specific files
 *.rsuser
 *.suo
-*.user
 *.userosscache
 *.sln.docstates
 
@@ -367,3 +366,11 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Additional entries for QueFarm project
+appsettings.Production.json
+uploads/
+backups/
+api-*/
+frontend/
+source/

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Image } from 'antd';
 import { FaImage } from 'react-icons/fa';
 
-// Helper function to resolve image URL
+// Helper function to resolve image URL - simplified for consistency
 const resolveImageUrl = (src) => {
   if (!src) return null;
   
@@ -11,16 +11,15 @@ const resolveImageUrl = (src) => {
     return src;
   }
   
-  // If it's a relative path starting with /, resolve it to backend
-  if (src.startsWith('/')) {
-    const API_BASE_URL = window.location.hostname === 'localhost' 
-      ? 'https://localhost:7013'
-      : '';
-    return `${API_BASE_URL}${src}`;
+  // For development, use full URL to backend
+  if (window.location.hostname === 'localhost') {
+    const normalizedSrc = src.startsWith('/') ? src : `/${src}`;
+    return `https://localhost:7013${normalizedSrc}`;
   }
   
-  // Otherwise return as is
-  return src;
+  // For production, use relative URL (nginx proxies /images/ to backend)
+  const normalizedSrc = src.startsWith('/') ? src : `/${src}`;
+  return normalizedSrc;
 };
 
 const ImageFallback = ({ src, alt, fallbackSrc = '/images/placeholder.svg', style, width, height, debug = false, className, ...props }) => {

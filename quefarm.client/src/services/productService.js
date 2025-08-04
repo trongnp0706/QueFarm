@@ -47,18 +47,22 @@ const getImageBaseUrl = () => {
   return window.location.origin;
 };
 
-// Helper function to generate full image URL
+// Helper function to generate image URL - simplified for production
 export const generateImageUrl = (imageUrl) => {
   // If already a full URL, return as-is
   if (!imageUrl || imageUrl.startsWith('http')) {
-    return imageUrl || '/placeholder.png';
+    return imageUrl || '/images/placeholder.svg';
   }
 
-  // Ensure image path starts with a slash
-  const normalizedImageUrl = imageUrl.startsWith('/') ? imageUrl : `/${imageUrl}`;
+  // For development, use full URL
+  if (window.location.hostname === 'localhost') {
+    const normalizedImageUrl = imageUrl.startsWith('/') ? imageUrl : `/${imageUrl}`;
+    return `${getImageBaseUrl()}${normalizedImageUrl}`;
+  }
 
-  // Combine base URL with image path
-  return `${getImageBaseUrl()}${normalizedImageUrl}`;
+  // For production, use relative URL (nginx will proxy /images/ to backend)
+  const normalizedImageUrl = imageUrl.startsWith('/') ? imageUrl : `/${imageUrl}`;
+  return normalizedImageUrl;
 };
 
 export const getAllProducts = async (pageNumber = 1, pageSize = 10, searchTerm = '') => {

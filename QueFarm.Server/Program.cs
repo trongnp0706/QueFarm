@@ -74,12 +74,16 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-// Add CORS
+// Add CORS - SECURE POLICY
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("SecurePolicy", policy =>
     {
-        policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+        policy
+            .WithOrigins("https://quefarm.page", "https://www.quefarm.page")
+            .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+            .WithHeaders("Content-Type", "Authorization", "Accept")
+            .AllowCredentials();
     });
 });
 
@@ -145,6 +149,7 @@ app.UseExceptionHandler(errorApp =>
     });
 });
 
+// Enable Swagger only in Development environment - SECURITY FIX
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -161,7 +166,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCors("AllowAll");
+app.UseCors("SecurePolicy");
 
 app.UseAuthentication();
 app.UseAuthorization();
