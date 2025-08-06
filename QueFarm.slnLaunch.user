@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "quefarm.client\\quefarm.client.esproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "QueFarm.Server\\QueFarm.Server.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

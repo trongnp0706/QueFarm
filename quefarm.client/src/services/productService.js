@@ -1,9 +1,9 @@
 import axios from 'axios';
 
 // Configure axios default base URL
-const API_BASE_URL = window.location.hostname === 'localhost' 
-  ? 'https://localhost:7013'
-  : ''; // Use relative URL in production
+// In development, use relative URL to leverage Vite proxy
+// In production, use relative URL (nginx will handle routing)
+const API_BASE_URL = '';
 
 // Create axios instance with interceptor for authentication
 const api = axios.create({
@@ -32,15 +32,15 @@ const API_URL = '/api/product';
 const getImageBaseUrl = () => {
   // Priority order:
   // 1. VITE_API_BASE_URL environment variable
-  // 2. Window location origin for local development
-  // 3. Fallback to relative path
+  // 2. Use Vite proxy in development (relative URL)
+  // 3. Production: use current origin
   if (import.meta.env.VITE_API_BASE_URL) {
     return import.meta.env.VITE_API_BASE_URL.replace(/\/+$/, ''); // Remove trailing slashes
   }
 
-  // For local development
+  // For local development, use relative URL (Vite proxy will handle it)
   if (window.location.hostname === 'localhost') {
-    return 'https://localhost:7013';
+    return ''; // Use relative URL to leverage Vite proxy
   }
 
   // Production: use the current origin
@@ -54,10 +54,10 @@ export const generateImageUrl = (imageUrl) => {
     return imageUrl || '/images/placeholder.svg';
   }
 
-  // For development, use full URL
+  // For development, use relative URL (Vite proxy will handle it)
   if (window.location.hostname === 'localhost') {
     const normalizedImageUrl = imageUrl.startsWith('/') ? imageUrl : `/${imageUrl}`;
-    return `${getImageBaseUrl()}${normalizedImageUrl}`;
+    return normalizedImageUrl; // Vite dev server will proxy to backend
   }
 
   // For production, use relative URL (nginx will proxy /images/ to backend)

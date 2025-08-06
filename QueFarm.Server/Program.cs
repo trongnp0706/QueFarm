@@ -74,16 +74,29 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-// Add CORS - SECURE POLICY
+// Add CORS - DEVELOPMENT & PRODUCTION POLICIES
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("SecurePolicy", policy =>
+    // Development Policy
+    options.AddPolicy("DevelopmentPolicy", policy =>
+    {
+        policy
+            .WithOrigins("https://localhost:53355", "http://localhost:53355", "https://localhost:3000", "http://localhost:3000")
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials()
+            .SetPreflightMaxAge(TimeSpan.FromMinutes(30));
+    });
+
+    // Production Policy
+    options.AddPolicy("ProductionPolicy", policy =>
     {
         policy
             .WithOrigins("https://quefarm.page", "https://www.quefarm.page")
             .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
             .WithHeaders("Content-Type", "Authorization", "Accept")
-            .AllowCredentials();
+            .AllowCredentials()
+            .SetPreflightMaxAge(TimeSpan.FromMinutes(30));
     });
 });
 
@@ -166,7 +179,15 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCors("SecurePolicy");
+// Use appropriate CORS policy based on environment
+if (app.Environment.IsDevelopment())
+{
+    app.UseCors("DevelopmentPolicy");
+}
+else
+{
+    app.UseCors("ProductionPolicy");
+}
 
 app.UseAuthentication();
 app.UseAuthorization();

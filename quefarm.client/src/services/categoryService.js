@@ -1,9 +1,10 @@
 import axios from 'axios';
 
 // Cấu hình URL cơ sở cho axios
-const API_BASE_URL = window.location.hostname === 'localhost' 
-  ? 'https://localhost:7013'
-  : ''; // Sử dụng URL tương đối trong môi trường sản xuất
+// Sử dụng proxy trong development, URL tương đối trong production
+const API_BASE_URL =  import.meta.env.NODE_ENV === 'production' 
+  ? '' // Sử dụng URL tương đối trong môi trường sản xuất
+  : ''; // Sử dụng proxy trong development
 
 // Tạo instance Axios tùy chỉnh
 const api = axios.create({
@@ -11,7 +12,11 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
-  }
+  },
+  // Trong development, tin tưởng self-signed certificates
+  ...(import.meta.env.NODE_ENV === 'development' && {
+    httpsAgent: false
+  })
 });
 
 // Thêm interceptor để gửi token xác thực khi có
