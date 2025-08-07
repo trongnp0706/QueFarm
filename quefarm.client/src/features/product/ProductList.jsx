@@ -192,16 +192,7 @@ function ProductList() {
         </div>
       </div>
 
-      {/* Breadcrumb with enhanced styling */}
-      <div className="bg-gray-50 border-b">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center text-sm text-gray-600">
-            <span>Trang chủ</span>
-            <span className="mx-2">/</span>
-            <span className="text-green-600 font-medium">Tất cả sản phẩm</span>
-          </div>
-        </div>
-      </div>
+
 
       <div className="bg-gray-50 min-h-screen">
         <div className="container mx-auto px-4 py-8">

@@ -19,13 +19,13 @@ function Header() {
   };
 
   return (
-    <header className="bg-brand-green-500 text-white sticky top-0 z-50 shadow-lg border-b-2 border-brand-green-600">
+    <header className="header-container text-white sticky top-0 z-50 shadow-lg border-b-2 border-brand-green-600">
       <div className="container mx-auto px-4 py-3">
         {/* Logo, Search, and Cart */}
         <div className="flex items-center justify-between">
           {/* Hamburger Menu for Mobile */}
           <div className="md:hidden">
-            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-white hover:text-brand-yellow-300 transition-colors">
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="header-action-btn">
               <FiMenu className="text-2xl" />
             </button>
           </div>
@@ -48,12 +48,12 @@ function Header() {
           </div>
 
           <div className="flex items-center space-x-4">
-            <Link to="/account" className="text-white hover:text-brand-yellow-300 flex items-center transition-colors">
+            <Link to="/account" className="header-action-btn">
               <FiUser className="text-xl md:mr-2" />
               <span className="hidden md:inline font-medium">Tài khoản</span>
             </Link>
 
-            <Link to="/cart" className="text-white hover:text-brand-yellow-300 flex items-center transition-colors">
+            <Link to="/cart" className="header-action-btn">
               <div className="relative">
                 <FiShoppingCart className="text-2xl" />
                 {totalItems > 0 && (
@@ -74,61 +74,37 @@ function Header() {
         <nav className={`flex-col md:flex-row md:flex flex-wrap justify-center mt-3 pt-2 border-t border-brand-green-400/30 ${isMenuOpen ? 'flex' : 'hidden'}`}>
           <Link 
             to="/" 
-            className={`font-medium py-2 px-4 w-full md:w-auto rounded-md transition-colors ${
-              isActive('/') 
-                ? 'bg-brand-green-600 text-brand-yellow-300 shadow-lg' 
-                : 'text-white hover:bg-brand-green-600 hover:text-brand-yellow-300'
-            }`}
+            className={`header-nav-link w-full md:w-auto ${isActive('/') ? 'active' : ''}`}
           >
             ĐẶC SẢN VÙNG MIỀN VIỆT NAM
           </Link>
           <Link 
             to="/products" 
-            className={`font-medium py-2 px-4 w-full md:w-auto rounded-md transition-colors ${
-              isActive('/products') 
-                ? 'bg-brand-green-600 text-brand-yellow-300 shadow-lg' 
-                : 'text-white hover:bg-brand-green-600 hover:text-brand-yellow-300'
-            }`}
+            className={`header-nav-link w-full md:w-auto ${isActive('/products') ? 'active' : ''}`}
           >
             TẤT CẢ SẢN PHẨM
           </Link>
           <Link 
             to="/about" 
-            className={`font-medium py-2 px-4 w-full md:w-auto rounded-md transition-colors ${
-              isActive('/about') 
-                ? 'bg-brand-green-600 text-brand-yellow-300 shadow-lg' 
-                : 'text-white hover:bg-brand-green-600 hover:text-brand-yellow-300'
-            }`}
+            className={`header-nav-link w-full md:w-auto ${isActive('/about') ? 'active' : ''}`}
           >
             GIỚI THIỆU
           </Link>
           <Link 
             to="/promotion" 
-            className={`font-medium py-2 px-4 w-full md:w-auto rounded-md transition-colors ${
-              isActive('/promotion') 
-                ? 'bg-brand-green-600 text-brand-yellow-300 shadow-lg' 
-                : 'text-white hover:bg-brand-green-600 hover:text-brand-yellow-300'
-            }`}
+            className={`header-nav-link w-full md:w-auto ${isActive('/promotion') ? 'active' : ''}`}
           >
             KHUYẾN MÃI
           </Link>
           <Link 
             to="/help" 
-            className={`font-medium py-2 px-4 w-full md:w-auto rounded-md transition-colors ${
-              isActive('/help') 
-                ? 'bg-brand-green-600 text-brand-yellow-300 shadow-lg' 
-                : 'text-white hover:bg-brand-green-600 hover:text-brand-yellow-300'
-            }`}
+            className={`header-nav-link w-full md:w-auto ${isActive('/help') ? 'active' : ''}`}
           >
             HỖ TRỢ MUA HÀNG
           </Link>
           <Link 
             to="/contact" 
-            className={`font-medium py-2 px-4 w-full md:w-auto rounded-md transition-colors ${
-              isActive('/contact') 
-                ? 'bg-brand-green-600 text-brand-yellow-300 shadow-lg' 
-                : 'text-white hover:bg-brand-green-600 hover:text-brand-yellow-300'
-            }`}
+            className={`header-nav-link w-full md:w-auto ${isActive('/contact') ? 'active' : ''}`}
           >
             LIÊN HỆ
           </Link>

@@ -24,48 +24,50 @@ const ProductCardSkeleton = () => (
 
 const ProductCard = ({ product }) => {
     const imageUrl = generateImageUrl(product.productImages?.[0]?.imageUrl || product.imageUrl);
-    const discount = product.discount || 0;
-    const originalPrice = product.price / (1 - discount / 100);
-
+    
     return (
-        <div className="group relative bg-white rounded-xl overflow-hidden border border-brand-cream-300 hover:border-brand-green-500 hover:shadow-xl transition-all duration-300 flex flex-col h-full shadow-sm product-card">
-            {discount > 0 && (
+        <div className="group relative">
+            {product.discountPercentage > 0 && (
                 <div className="discount-badge">
-                    -{Math.round(discount)}%
+                    -{Math.round(product.discountPercentage)}%
                 </div>
             )}
-            <Link to={`/product/${product.id}`} className="block overflow-hidden">
-                <div className="product-image-container">
-                    <ImageFallback
-                        src={imageUrl}
-                        alt={product.name}
-                        className="product-image"
-                        fallbackSrc="/images/placeholder.svg"
-                    />
-                </div>
-            </Link>
-            <div className="product-content">
-                <h3 className="product-title group-hover:text-brand-green-700 transition-colors line-clamp-2 leading-tight">
-                    <Link to={`/product/${product.id}`} className="hover:text-brand-green-700">
-                        {product.name}
-                    </Link>
-                </h3>
-                <div className="flex items-baseline justify-between gap-2 mb-2">
-                    {discount > 0 && (
-                        <span className="product-original-price">
-                            {originalPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
-                        </span>
-                    )}
-                    <span className="product-price">
-                        {product.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
-                    </span>
-                </div>
-                <Link
-                    to={`/product/${product.id}`}
-                    className="btn-primary text-center mt-auto"
-                >
-                    MUA NGAY
+            <div className="bg-white rounded-xl overflow-hidden border border-brand-cream-300 hover:border-brand-green-500 hover:shadow-xl transition-all duration-300 shadow-sm product-card">
+                <Link to={`/product/${product.id}`} className="block overflow-hidden">
+                    <div className="product-image-container">
+                        <ImageFallback
+                            src={imageUrl}
+                            alt={product.name}
+                            className="product-image"
+                            fallbackSrc="/images/placeholder.svg"
+                        />
+                    </div>
                 </Link>
+                <div className="product-content">
+                    <h3 className="product-title group-hover:text-brand-green-700 transition-colors line-clamp-2 leading-tight">
+                        <Link to={`/product/${product.id}`} className="hover:text-brand-green-700">
+                            {product.name}
+                        </Link>
+                    </h3>
+                    <div className="flex justify-between items-center mb-2">
+                        <div className="flex flex-col">
+                            {product.originalPrice && (
+                                <span className="product-original-price">
+                                    {product.originalPrice.toLocaleString()}₫
+                                </span>
+                            )}
+                            <span className="product-price">
+                                {product.price.toLocaleString()}₫
+                            </span>
+                        </div>
+                    </div>
+                    <Link 
+                        to={`/product/${product.id}`}
+                        className="btn-primary text-center mt-auto"
+                    >
+                        MUA NGAY
+                    </Link>
+                </div>
             </div>
         </div>
     );
@@ -75,7 +77,7 @@ const ProductCard = ({ product }) => {
 const ProductGrid = ({ products, loading = false, itemsPerPage = 12 }) => {
     if (loading) {
         return (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4 lg:gap-6 product-grid">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-2 sm:gap-3 md:gap-4 product-grid">
                 {[...Array(itemsPerPage)].map((_, index) => (
                     <ProductCardSkeleton key={index} />
                 ))}
@@ -88,7 +90,7 @@ const ProductGrid = ({ products, loading = false, itemsPerPage = 12 }) => {
     }
 
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4 lg:gap-6 product-grid">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-2 sm:gap-3 md:gap-4 product-grid">
             {products.map(product => (
                 <ProductCard key={product.id} product={product} />
             ))}

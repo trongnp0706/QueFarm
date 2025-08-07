@@ -11,16 +11,16 @@ export default {
         // Logo-inspired color palette
         'brand': {
           'green': {
-            '50': '#f0fdf4',
+            '50': '#f0fdf2',
             '100': '#dcfce7',
             '200': '#bbf7d0',
             '300': '#86efac',
             '400': '#4ade80',
-            '500': '#22c55e', // Main vibrant green from logo
-            '600': '#16a34a',
-            '700': '#15803d',
-            '800': '#14532d', // Darker green for header
-            '900': '#052e16',
+            '500': '#2dd653', // Warmer, more natural green from logo
+            '600': '#22a043',
+            '700': '#1e7e3a',
+            '800': '#166534', // Rich forest green
+            '900': '#14532d',
             '950': '#052e16',
           },
           'brown': {

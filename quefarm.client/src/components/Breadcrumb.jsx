@@ -88,6 +88,37 @@ function Breadcrumb() {
     }
   ];
 
+  // Thêm breadcrumb cho các trang chính
+  if (location.pathname === '/products') {
+    breadcrumbItems.push({
+      title: <span className="text-gray-800 font-medium">Tất cả sản phẩm</span>,
+    });
+  } else if (location.pathname === '/about') {
+    breadcrumbItems.push({
+      title: <span className="text-gray-800 font-medium">Giới thiệu</span>,
+    });
+  } else if (location.pathname === '/contact') {
+    breadcrumbItems.push({
+      title: <span className="text-gray-800 font-medium">Liên hệ</span>,
+    });
+  } else if (location.pathname === '/promotion') {
+    breadcrumbItems.push({
+      title: <span className="text-gray-800 font-medium">Khuyến mãi</span>,
+    });
+  } else if (location.pathname === '/help') {
+    breadcrumbItems.push({
+      title: <span className="text-gray-800 font-medium">Hỗ trợ mua hàng</span>,
+    });
+  } else if (location.pathname === '/cart') {
+    breadcrumbItems.push({
+      title: <span className="text-gray-800 font-medium">Giỏ hàng</span>,
+    });
+  } else if (location.pathname === '/checkout') {
+    breadcrumbItems.push({
+      title: <span className="text-gray-800 font-medium">Thanh toán</span>,
+    });
+  }
+
   if (category) {
     const catName = category.Name || category.name;
     const catSlug = category.Slug || category.slug;

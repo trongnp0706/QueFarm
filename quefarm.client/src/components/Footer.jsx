@@ -1,4 +1,5 @@
 import { FaFacebook, FaPhoneAlt, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa';
+import { SiZalo } from 'react-icons/si';
 
 function Footer() {
   return (
@@ -8,18 +9,22 @@ function Footer() {
         {/* Contact Info */}
         <div className="lg:col-span-1">
           <h3 className="font-bold text-xl mb-4 border-b-2 border-brand-green-400 pb-2 text-white">THÔNG TIN LIÊN HỆ</h3>
-          <p className="mb-2 font-semibold text-white">Công ty TNHH TM XNK Hoàng Mỹ Gia</p>
+          <p className="mb-2 font-semibold text-white">Quê Farm - Đặc sản vùng miền</p>
           <p className="flex items-start mb-2">
             <FaMapMarkerAlt className="mr-3 mt-1 text-brand-yellow-400 flex-shrink-0" /> 
-            <span className="text-gray-200">584/36/2 Tân Kỳ Tân Quý, P. Bình Hưng Hòa, Q. Bình Tân, TP.HCM</span>
+            <span className="text-gray-200">110B Đường 339, P. Phước Long, Thủ Đức, TP.HCM</span>
           </p>
           <p className="flex items-center mb-2">
             <FaPhoneAlt className="mr-3 text-brand-yellow-400" /> 
-            Hotline: <a href="tel:0909109595" className="ml-1 hover:text-brand-yellow-300 transition-colors">0909 10 9595</a>
+            Hotline: <a href="tel:0325005386" className="ml-1 hover:text-brand-yellow-300 transition-colors">0325.005.386</a>
+          </p>
+          <p className="flex items-center mb-2">
+            <SiZalo className="mr-3 text-brand-yellow-400" /> 
+            Zalo: <a href="https://zalo.me/0708238869" target="_blank" rel="noopener noreferrer" className="ml-1 hover:text-brand-yellow-300 transition-colors">070.823.88.69</a>
           </p>
           <p className="flex items-center mb-2">
             <FaEnvelope className="mr-3 text-brand-yellow-400" /> 
-            Email: <a href="mailto:saladmin@hoangmygia.com" className="ml-1 hover:text-brand-yellow-300 transition-colors break-all">saladmin@hoangmygia.com</a>
+            Email: <a href="mailto:quefarmfood@gmail.com" className="ml-1 hover:text-brand-yellow-300 transition-colors break-all">quefarmfood@gmail.com</a>
           </p>
           <p className="flex items-center">
             <FaFacebook className="mr-3 text-brand-yellow-400" /> 

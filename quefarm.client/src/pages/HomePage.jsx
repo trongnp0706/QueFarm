@@ -36,7 +36,7 @@ function ProductSection({ title, products, viewAllLink, loading = false }) {
         ) : (
           products.map(product => (
             <div key={product.id} className="group relative">
-              {product.discountPercentage && (
+              {product.discountPercentage > 0 && (
                 <div className="discount-badge">
                   -{Math.round(product.discountPercentage)}%
                 </div>
@@ -194,7 +194,7 @@ function HomePage() {
                 price: product.price || 0,
                 originalPrice: product.originalPrice,
                 name: product.name || 'Sản phẩm không tên',
-                discountPercentage: product.discount,
+                discountPercentage: product.discount || product.Discount || product.discountPercentage || 0,
                 region: product.category?.name // Assuming category name holds region
             };
         };
