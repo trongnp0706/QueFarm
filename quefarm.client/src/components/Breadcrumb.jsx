@@ -2,6 +2,7 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Breadcrumb as AntBreadcrumb } from 'antd';
 import { HomeOutlined } from '@ant-design/icons';
+import { getAllCategories } from '../services/categoryService';
 
 function Breadcrumb() {
   const location = useLocation();
@@ -9,6 +10,21 @@ function Breadcrumb() {
   const [category, setCategory] = useState(null);
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
+
+  // Load categories once
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const categoryData = await getAllCategories();
+        setCategories(categoryData || []);
+      } catch (error) {
+        console.error('Error fetching categories for breadcrumb:', error);
+      }
+    };
+    
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     setCategory(null);
@@ -90,9 +106,28 @@ function Breadcrumb() {
 
   // Thêm breadcrumb cho các trang chính
   if (location.pathname === '/products') {
-    breadcrumbItems.push({
-      title: <span className="text-gray-800 font-medium">Tất cả sản phẩm</span>,
-    });
+    const categoryParam = new URLSearchParams(location.search).get('category');
+    if (categoryParam) {
+      // Hiển thị breadcrumb với danh mục được lọc
+      breadcrumbItems.push({
+        title: (
+          <Link to="/products" className="text-gray-600 hover:text-green-600">
+            Tất cả sản phẩm
+          </Link>
+        ),
+      });
+      // Tìm category từ danh sách categories theo slug
+      const foundCategory = categories.find(cat => cat.slug === categoryParam);
+      const categoryName = foundCategory ? foundCategory.name : categoryParam.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      
+      breadcrumbItems.push({
+        title: <span className="text-gray-800 font-medium">{categoryName}</span>,
+      });
+    } else {
+      breadcrumbItems.push({
+        title: <span className="text-gray-800 font-medium">Tất cả sản phẩm</span>,
+      });
+    }
   } else if (location.pathname === '/about') {
     breadcrumbItems.push({
       title: <span className="text-gray-800 font-medium">Giới thiệu</span>,

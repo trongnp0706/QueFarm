@@ -1,24 +1,50 @@
 import { useState, useEffect } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { FaFilter, FaSort, FaThLarge, FaList } from 'react-icons/fa';
 import CategoryMenu from '../category/CategoryMenu';
 import ProductGrid from './ProductGrid';
 import { getAllProducts, getProductsByCategorySlug, searchProducts, generateImageUrl } from '../../services/productService';
+import { getAllCategories } from '../../services/categoryService';
+import ImageFallback from '../../components/ImageFallback';
 
 function ProductList() {
   const { categorySlug } = useParams();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]); // Store all products for filtering
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
   const [sortBy, setSortBy] = useState('popularity');
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState([0, 1000000]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [categories, setCategories] = useState([]);
   
   // Search query from URL if present
   const query = searchParams.get('q') || '';
+  const categoryParam = searchParams.get('category') || '';
+
+  // Sync selectedCategory with URL param
+  useEffect(() => {
+    setSelectedCategory(categoryParam || null);
+  }, [categoryParam]);
   
+  // Load categories for filtering
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const categoryData = await getAllCategories();
+        setCategories(categoryData || []);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+    
+    fetchCategories();
+  }, []);
+
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
@@ -34,7 +60,7 @@ function ProductList() {
           // Search products
           productsData = await searchProducts(query);
         } else {
-          // Get all products
+          // Get all products for products page
           const response = await getAllProducts(1, 50);
           productsData = response.items || [];
         }
@@ -109,48 +135,94 @@ function ProductList() {
           };
         });
         
-        // Apply client-side filtering and sorting
-        let filteredProducts = [...productsData];
+        // Store all products for filtering
+        setAllProducts(productsData);
         
-        // Filter by price range
-        filteredProducts = filteredProducts.filter(p => 
-          p.price >= priceRange[0] && p.price <= priceRange[1]
-        );
-        
-        // Sort products
-        switch (sortBy) {
-          case 'price-asc':
-            filteredProducts.sort((a, b) => a.price - b.price);
-            break;
-          case 'price-desc':
-            filteredProducts.sort((a, b) => b.price - a.price);
-            break;
-          case 'name':
-            filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
-            break;
-          case 'rating':
-            filteredProducts.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-            break;
-          case 'popularity':
-          default:
-            // Default sorting (by popularity)
-            break;
-        }
-        
-        setProducts(filteredProducts);
       } catch {
         setError('Không thể tải danh sách sản phẩm từ database. Vui lòng kiểm tra kết nối server.');
         setProducts([]);
+        setAllProducts([]);
       } finally {
         setLoading(false);
       }
     };
     
     fetchProducts();
-  }, [categorySlug, query, sortBy, priceRange]);
+  }, [categorySlug, query]);
 
-  const handleCategorySelect = () => {
-    // In a real app, update URL or fetch products by category ID
+  // Separate effect for filtering and sorting
+  useEffect(() => {
+    let filteredProducts = [...allProducts];
+    
+    // Filter by category if selected
+    if (categoryParam) {
+      console.log('Filtering by category slug:', categoryParam);
+      console.log('All products before filter:', allProducts.length);
+      console.log('Categories available:', categories.map(c => ({id: c.id, name: c.name, slug: c.slug})));
+      
+      // Find category by slug to get the ID
+      const selectedCategoryObj = categories.find(cat => cat.slug === categoryParam);
+      console.log('Selected category object:', selectedCategoryObj);
+      
+      if (selectedCategoryObj) {
+        filteredProducts = filteredProducts.filter(product => {
+          const productCategoryId = product.categoryId || product.CategoryId;
+          console.log(`Product "${product.name}" categoryId:`, productCategoryId, 'vs selected:', selectedCategoryObj.id);
+          return productCategoryId === selectedCategoryObj.id;
+        });
+      } else {
+        // Fallback: filter by category name
+        filteredProducts = filteredProducts.filter(product => {
+          const categoryName = product.categoryName || product.CategoryName;
+          return categoryName?.toLowerCase().includes(categoryParam.toLowerCase());
+        });
+      }
+      
+      console.log('Filtered products count:', filteredProducts.length);
+    }
+    
+    // Filter by price range
+    filteredProducts = filteredProducts.filter(p => 
+      p.price >= priceRange[0] && p.price <= priceRange[1]
+    );
+    
+    // Sort products
+    switch (sortBy) {
+      case 'price-asc':
+        filteredProducts.sort((a, b) => a.price - b.price);
+        break;
+      case 'price-desc':
+        filteredProducts.sort((a, b) => b.price - a.price);
+        break;
+      case 'name':
+        filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case 'rating':
+        filteredProducts.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        break;
+      case 'popularity':
+      default:
+        // Default sorting (by popularity)
+        break;
+    }
+    
+    setProducts(filteredProducts);
+  }, [allProducts, categoryParam, sortBy, priceRange, categories]);
+
+  const handleCategorySelect = (categorySlug) => {
+    if (categorySlug) {
+      // Update URL with category parameter
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.set('category', categorySlug);
+      setSearchParams(newSearchParams);
+      setSelectedCategory(categorySlug);
+    } else {
+      // Clear category filter
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete('category');
+      setSearchParams(newSearchParams);
+      setSelectedCategory(null);
+    }
   };
   
   const handleSortChange = (e) => {
@@ -221,7 +293,12 @@ function ProductList() {
             {/* Enhanced Sidebar with filters */}
             <div className="lg:w-1/4">
               <div className="sticky top-4">
-                <CategoryMenu onSelect={handleCategorySelect} className="mb-6" />
+                <CategoryMenu 
+              onSelect={handleCategorySelect} 
+              activeCategory={selectedCategory}
+              isProductsPage={!categorySlug}
+              className="mb-6" 
+            />
                 
                 <div className="bg-white rounded-lg shadow-sm mb-6 overflow-hidden">
                   <div className="bg-gradient-to-r from-green-700 to-green-600 text-white py-4 px-4 flex items-center justify-between">
@@ -404,15 +481,11 @@ function ProductList() {
                                 HOT
                               </div>
                             )}
-                            <img 
+                            <ImageFallback 
                               src={product.imageUrl} 
                               alt={product.name} 
                               className="w-full h-32 object-cover rounded-lg"
-                              onError={(e) => {
-                                if (e.target.src !== '/placeholder.png') {
-                                  e.target.src = '/placeholder.png';
-                                }
-                              }}
+                              fallbackSrc="/images/placeholder.svg"
                             />
                           </div>
                           <div className="w-3/4 pl-6 flex flex-col">

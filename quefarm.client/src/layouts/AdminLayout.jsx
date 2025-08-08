@@ -31,12 +31,12 @@ const AdminLayout = () => {
   
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Header className="bg-white flex items-center justify-between px-6">
+      <Header className="admin-header flex items-center justify-between px-6">
         <div className="logo flex items-center">
           <Link to="/">
-            <img src="/logo.png" alt="QueFarm" className="h-10" />
+            <img src="/logo.png" alt="QueFarm" className="admin-logo" />
           </Link>
-          <span className="ml-4 text-lg font-bold">Quản trị QueFarm</span>
+          <span className="admin-title">Quản trị QueFarm</span>
         </div>
       </Header>
       <Layout>

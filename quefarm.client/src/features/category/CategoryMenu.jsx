@@ -4,9 +4,9 @@ import { FaLeaf, FaList } from 'react-icons/fa';
 import categoryService from '../../services/categoryService';
 
 // SVG icon mẫu cho từng danh mục (có thể thay thế sau)
-function CategoryMenu({ onSelect }) {
+function CategoryMenu({ onSelect, activeCategory: propActiveCategory, isProductsPage = false }) {
   const [categories, setCategories] = useState([]);
-  const [activeCategory, setActiveCategory] = useState(null);
+  const [activeCategory, setActiveCategory] = useState(propActiveCategory || null);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -33,10 +33,28 @@ function CategoryMenu({ onSelect }) {
     fetchCategories();
   }, []);
 
-  const handleCategoryClick = (categoryId) => {
-    setActiveCategory(categoryId);
-    if (onSelect) {
-      onSelect(categoryId);
+  const handleCategoryClick = (category, e) => {
+    if (isProductsPage) {
+      if (e) e.preventDefault(); // Prevent navigation on products page
+      if (category) {
+        setActiveCategory(category.id);
+        if (onSelect) {
+          onSelect(category.slug);
+        }
+      } else {
+        // Clear category selection
+        setActiveCategory(null);
+        if (onSelect) {
+          onSelect(null);
+        }
+      }
+    } else {
+      if (category) {
+        setActiveCategory(category.id);
+        if (onSelect) {
+          onSelect(category.id);
+        }
+      }
     }
   };
 
@@ -52,20 +70,50 @@ function CategoryMenu({ onSelect }) {
       
       {/* Category List */}
       <ul className="divide-y divide-gray-200">
-        {categories.map((category) => (
-          <li key={category.id}>
-            <Link 
-              to={`/category/${category.slug}`}
-              className={`flex items-center justify-between py-3 px-4 hover:bg-green-50 transition-colors
-                ${activeCategory === category.id ? 'bg-green-50 text-green-700 font-medium' : 'text-gray-700'}`}
-              onClick={() => handleCategoryClick(category.id)}
+        {/* All products option for products page */}
+        {isProductsPage && (
+          <li>
+            <button 
+              className={`w-full text-left flex items-center justify-between py-3 px-4 hover:bg-green-50 transition-colors
+                ${!activeCategory ? 'bg-green-50 text-green-700 font-medium' : 'text-gray-700'}`}
+              onClick={(e) => handleCategoryClick(null, e)}
             >
               <div className="flex items-center">
-                <FaLeaf className={`mr-3 ${activeCategory === category.id ? 'text-green-600' : 'text-green-400'}`} />
-                <span>{category.name}</span>
+                <FaLeaf className={`mr-3 ${!activeCategory ? 'text-green-600' : 'text-green-400'}`} />
+                <span>Tất cả sản phẩm</span>
               </div>
-              <span className="text-xs bg-gray-100 px-2 py-1 rounded-full">{category.count}</span>
-            </Link>
+            </button>
+          </li>
+        )}
+        
+        {categories.map((category) => (
+          <li key={category.id}>
+            {isProductsPage ? (
+              <button 
+                className={`w-full text-left flex items-center justify-between py-3 px-4 hover:bg-green-50 transition-colors
+                  ${activeCategory === category.id ? 'bg-green-50 text-green-700 font-medium' : 'text-gray-700'}`}
+                onClick={(e) => handleCategoryClick(category, e)}
+              >
+                <div className="flex items-center">
+                  <FaLeaf className={`mr-3 ${activeCategory === category.id ? 'text-green-600' : 'text-green-400'}`} />
+                  <span>{category.name}</span>
+                </div>
+                <span className="text-xs bg-gray-100 px-2 py-1 rounded-full">{category.count}</span>
+              </button>
+            ) : (
+              <Link 
+                to={`/category/${category.slug}`}
+                className={`flex items-center justify-between py-3 px-4 hover:bg-green-50 transition-colors
+                  ${activeCategory === category.id ? 'bg-green-50 text-green-700 font-medium' : 'text-gray-700'}`}
+                onClick={(e) => handleCategoryClick(category, e)}
+              >
+                <div className="flex items-center">
+                  <FaLeaf className={`mr-3 ${activeCategory === category.id ? 'text-green-600' : 'text-green-400'}`} />
+                  <span>{category.name}</span>
+                </div>
+                <span className="text-xs bg-gray-100 px-2 py-1 rounded-full">{category.count}</span>
+              </Link>
+            )}
           </li>
         ))}
       </ul>

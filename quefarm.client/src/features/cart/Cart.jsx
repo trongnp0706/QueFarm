@@ -2,6 +2,7 @@ import { useContext } from 'react';
 import { CartContext } from '../../context/CartContext';
 import { Link } from 'react-router-dom';
 import { FaTrash, FaMinus, FaPlus, FaShoppingCart } from 'react-icons/fa';
+import ImageFallback from '../../components/ImageFallback';
 
 function Cart() {
   const { cart, addToCart, removeFromCart, clearCart } = useContext(CartContext);
@@ -55,10 +56,14 @@ function Cart() {
               <div key={item.id} className="border-b last:border-b-0 py-4 flex flex-wrap md:flex-nowrap items-center">
                 {/* Product info */}
                 <div className="w-full md:w-2/5 flex gap-4 mb-4 md:mb-0">
-                  <img 
+                  <ImageFallback 
                     src={item.imageUrl} 
                     alt={item.name}
-                    className="w-20 h-20 object-cover rounded" 
+                    width={80}
+                    height={80}
+                    className="rounded"
+                    imgStyle={{ objectFit: 'cover', width: '80px', height: '80px', borderRadius: '0.25rem' }}
+                    fallbackSrc="/images/placeholder.svg"
                   />
                   <div>
                     <h3 className="font-medium">{item.name}</h3>

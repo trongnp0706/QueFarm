@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { PlusOutlined, EditOutlined, DeleteOutlined, UploadOutlined, ReloadOutlined } from '@ant-design/icons';
+import ImageFallback from '../../components/ImageFallback';
 
 function ProductAdmin() {
   const [products, setProducts] = useState([]);
@@ -182,7 +183,7 @@ function ProductAdmin() {
               <div className="grid grid-cols-3 gap-2 mt-2">
                 {images.map((img, idx) => (
                   <div key={img.id || img.url} draggable onDragStart={e => handleDragStart(e, idx)} onDrop={e => handleDrop(e, idx)} onDragOver={handleDragOver} className="relative group cursor-move">
-                    <img src={img.url} alt="preview" className="w-16 h-12 object-cover rounded border" />
+                    <ImageFallback src={img.url} alt="preview" className="w-16 h-12 object-cover rounded border" fallbackSrc="/images/placeholder.svg" />
                     <button type="button" onClick={() => handleRemoveImage(idx)} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-80 group-hover:opacity-100 shadow"><DeleteOutlined /></button>
                   </div>
                 ))}
@@ -240,7 +241,7 @@ function ProductAdmin() {
                   <td className="px-3 py-2">
                     <div className="flex gap-1">
                       {(prod.images || []).slice(0, 3).map(img => (
-                        <img key={img.id} src={img.imageUrl} alt="" className="w-12 h-8 object-cover rounded border hover:scale-150 hover:z-10 transition-transform duration-200 shadow-sm" />
+                        <ImageFallback key={img.id} src={img.imageUrl} alt="" className="w-12 h-8 object-cover rounded border hover:scale-150 hover:z-10 transition-transform duration-200 shadow-sm" fallbackSrc="/images/placeholder.svg" />
                       ))}
                       {(prod.images || []).length > 3 && (
                         <div className="w-12 h-8 bg-gray-200 rounded border flex items-center justify-center text-xs text-gray-600 font-bold">

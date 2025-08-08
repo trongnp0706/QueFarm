@@ -4,6 +4,7 @@ import { Card, Row, Col, Spin, Alert, Empty, Typography, Tag, Rate, Button } fro
 import { ShoppingCartOutlined, HeartOutlined, AppstoreOutlined } from '@ant-design/icons';
 import { getCategoryById, getCategoryBySlug } from '../services/categoryService';
 import { getProductsByCategorySlug, generateImageUrl } from '../services/productService';
+import ImageFallback from '../components/ImageFallback';
 
 const { Title, Paragraph } = Typography;
 
@@ -125,7 +126,7 @@ function CategoryPage() {
                   className="h-full transition-all duration-300"
                   cover={
                     <div className="relative">
-                      <img
+                      <ImageFallback
                         alt={product.name}
                         src={generateImageUrl(
                           product.imageUrl || 
@@ -134,7 +135,7 @@ function CategoryPage() {
                             : null)
                         )}
                         className="h-48 w-full object-cover rounded-t-lg"
-                        onError={e => { e.target.src = 'https://via.placeholder.com/300x200?text=No+Image'; }}
+                        fallbackSrc="/images/placeholder.svg"
                       />
                       <button className="absolute top-2 right-2 bg-white/80 hover:bg-white rounded-full p-2 shadow-md">
                         <HeartOutlined className="text-gray-400 hover:text-red-500" />

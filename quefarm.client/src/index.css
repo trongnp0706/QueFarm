@@ -802,3 +802,25 @@ footer {
     gap: 1.5rem; /* Even larger gap on desktop */
   }
 }
+
+/* Admin Layout Styles */
+.admin-header {
+  background-color: var(--brand-green-500) !important;
+  border-bottom: 2px solid var(--brand-green-600);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.admin-logo {
+  height: 3rem;
+  width: 3rem;
+  border-radius: 50%;
+  border: 2px solid var(--brand-green-400);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.admin-title {
+  color: white;
+  font-weight: 700;
+  font-size: 1.125rem;
+  margin-left: 1rem;
+}

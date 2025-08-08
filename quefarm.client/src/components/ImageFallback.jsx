@@ -22,7 +22,7 @@ const resolveImageUrl = (src) => {
   return normalizedSrc;
 };
 
-const ImageFallback = ({ src, alt, fallbackSrc = '/images/placeholder.svg', style, width, height, debug = false, className, ...props }) => {
+const ImageFallback = ({ src, alt, fallbackSrc = '/images/placeholder.svg', style, width, height, debug = false, className, imgStyle, imgClassName, ...props }) => {
   const [imageError, setImageError] = useState(false);
   const resolvedSrc = resolveImageUrl(src);
   const resolvedFallbackSrc = resolveImageUrl(fallbackSrc);
@@ -70,6 +70,7 @@ const ImageFallback = ({ src, alt, fallbackSrc = '/images/placeholder.svg', styl
         width: width,
         height: height
       }}
+      imgStyle={imgStyle}
       onError={handleError}
       onLoad={handleLoad}
       fallback={resolvedFallbackSrc}
