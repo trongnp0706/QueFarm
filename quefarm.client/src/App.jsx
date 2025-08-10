@@ -18,6 +18,8 @@ import AdminLogin from './pages/LoginPage';
 import Dashboard from './features/admin/Dashboard';
 import ProductManagement from './features/admin/product/ProductManagement';
 import CategoryManagement from './features/admin/category/CategoryManagement';
+import OrderManagement from './features/admin/order/OrderManagement';
+import OrderDetailPage from './features/admin/order/OrderDetailPage';
 
 // Static Pages
 const StaticPage = ({ title }) => (
@@ -66,6 +68,8 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="products/*" element={<ProductManagement />} />
             <Route path="categories/*" element={<CategoryManagement />} />
+            <Route path="orders" element={<OrderManagement />} />
+            <Route path="orders/:id" element={<OrderDetailPage />} />
             <Route path="*" element={<div>Page not found in Admin</div>} />
           </Route>
           

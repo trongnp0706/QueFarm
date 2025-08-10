@@ -5,15 +5,11 @@ import { FaTrash, FaMinus, FaPlus, FaShoppingCart } from 'react-icons/fa';
 import ImageFallback from '../../components/ImageFallback';
 
 function Cart() {
-  const { cart, addToCart, removeFromCart, clearCart } = useContext(CartContext);
+  const { cart, updateQuantity, removeFromCart, clearCart } = useContext(CartContext);
 
-  const updateQuantity = (product, change) => {
+  const handleStepQuantity = (product, change) => {
     const newQty = product.quantity + change;
-    if (newQty <= 0) {
-      removeFromCart(product.id);
-    } else {
-      addToCart({ ...product, quantity: newQty });
-    }
+    updateQuantity(product.id, newQty);
   };
 
   const calculateTotal = () => {
@@ -87,7 +83,7 @@ function Cart() {
                 <div className="w-1/3 md:w-1/5 flex justify-center mb-4 md:mb-0">
                   <div className="border border-gray-300 rounded flex items-center">
                     <button 
-                      onClick={() => updateQuantity(item, -1)}
+                      onClick={() => handleStepQuantity(item, -1)}
                       className="px-2 py-1 text-gray-600 hover:bg-gray-100"
                     >
                       <FaMinus size={12} />
@@ -96,7 +92,7 @@ function Cart() {
                       {item.quantity}
                     </span>
                     <button 
-                      onClick={() => updateQuantity(item, 1)}
+                      onClick={() => handleStepQuantity(item, 1)}
                       className="px-2 py-1 text-gray-600 hover:bg-gray-100"
                     >
                       <FaPlus size={12} />

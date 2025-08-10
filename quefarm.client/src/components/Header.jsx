@@ -1,12 +1,15 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FiShoppingCart, FiUser, FiSearch, FiMenu } from 'react-icons/fi'; // Added FiMenu
 import { useContext, useState } from 'react'; // Added useState
 import { CartContext } from '../context/CartContext';
+import AdminLoginModal from './AdminLoginModal';
 
 function Header() {
   const { cart } = useContext(CartContext);
   const [isMenuOpen, setIsMenuOpen] = useState(false); // State for mobile menu
+  const [showLogin, setShowLogin] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -16,6 +19,15 @@ function Header() {
       return location.pathname === '/';
     }
     return location.pathname.startsWith(path);
+  };
+
+  const handleAccountClick = () => {
+    const token = localStorage.getItem('adminToken');
+    if (token) {
+      navigate('/admin');
+    } else {
+      setShowLogin(true);
+    }
   };
 
   return (
@@ -48,10 +60,10 @@ function Header() {
           </div>
 
           <div className="flex items-center space-x-4">
-            <Link to="/account" className="header-action-btn">
+            <button onClick={handleAccountClick} className="header-action-btn">
               <FiUser className="text-xl md:mr-2" />
               <span className="hidden md:inline font-medium">Tài khoản</span>
-            </Link>
+            </button>
 
             <Link to="/cart" className="header-action-btn">
               <div className="relative">
@@ -124,6 +136,7 @@ function Header() {
             </div>
           </div>
       </div>
+      <AdminLoginModal open={showLogin} onClose={() => setShowLogin(false)} onSuccess={() => navigate('/admin')} />
     </header>
   );
 }

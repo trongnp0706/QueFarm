@@ -6,7 +6,6 @@ import {
   ShoppingOutlined,
   AppstoreOutlined,
   ShoppingCartOutlined,
-  UserOutlined,
   SettingOutlined,
   LogoutOutlined,
 } from '@ant-design/icons';
@@ -24,7 +23,6 @@ const AdminLayout = () => {
     if (path.startsWith('/admin/products')) return '2';
     if (path.startsWith('/admin/categories')) return '3';
     if (path.startsWith('/admin/orders')) return '4';
-    if (path.startsWith('/admin/users')) return '5';
     if (path.startsWith('/admin/settings')) return '6';
     return '1';
   };
@@ -71,12 +69,6 @@ const AdminLayout = () => {
                 onClick: () => navigate('/admin/orders')
               },
               {
-                key: '5',
-                icon: <UserOutlined />,
-                label: 'Người dùng',
-                onClick: () => navigate('/admin/users')
-              },
-              {
                 key: '6',
                 icon: <SettingOutlined />,
                 label: 'Cài đặt',
@@ -86,7 +78,10 @@ const AdminLayout = () => {
                 key: '7',
                 icon: <LogoutOutlined />,
                 label: 'Đăng xuất',
-                onClick: () => navigate('/')
+                onClick: () => {
+                  localStorage.removeItem('adminToken');
+                  navigate('/');
+                }
               }
             ]}
           />

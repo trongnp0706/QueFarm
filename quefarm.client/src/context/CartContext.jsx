@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CartContext } from './CartContext';
 
 export function CartProvider({ children }) {
@@ -11,13 +11,37 @@ export function CartProvider({ children }) {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
+  const normalizeProductForCart = (product) => {
+    const discountPercent = product.discountPercentage ?? product.discount ?? null;
+    const parsedDiscount = discountPercent != null ? Number(discountPercent) : null;
+    const basePrice = Number(product.price) || 0;
+
+    // IMPORTANT: Backend price is already the effective/current price.
+    // Do not re-apply discount. Only carry metadata for UI.
+    return {
+      ...product,
+      price: basePrice,
+      originalPrice: product.originalPrice ?? product.OriginalPrice ?? undefined,
+      discount: parsedDiscount != null && !Number.isNaN(parsedDiscount) ? parsedDiscount : undefined,
+    };
+  };
+
   const addToCart = (product) => {
     setCart(prev => {
       const found = prev.find(item => item.id === product.id);
+      const quantityToAdd = product.quantity && product.quantity > 0 ? product.quantity : 1;
+
       if (found) {
-        return prev.map(item => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item);
+        // Only update quantity; keep existing pricing to avoid re-discounting
+        return prev.map(item =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + quantityToAdd }
+            : item
+        );
       }
-      return [...prev, { ...product, quantity: 1 }];
+
+      const normalized = normalizeProductForCart(product);
+      return [...prev, { ...normalized, quantity: quantityToAdd }];
     });
   };
 
@@ -35,8 +59,16 @@ export function CartProvider({ children }) {
 
   const clearCart = () => setCart([]);
 
+  const getTotalItems = useMemo(() => () => {
+    return cart.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+  }, [cart]);
+
+  const getTotalPrice = useMemo(() => () => {
+    return cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity) || 0), 0);
+  }, [cart]);
+
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart }}>
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart, getTotalItems, getTotalPrice }}>
       {children}
     </CartContext.Provider>
   );

@@ -71,6 +71,8 @@ namespace QueFarm.Server.Data
                 .HasOne(oi => oi.Product)
                 .WithMany(p => p.OrderItems)
                 .HasForeignKey(oi => oi.ProductId);
+
+            
         }
     }
 } 

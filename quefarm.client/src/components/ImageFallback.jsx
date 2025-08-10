@@ -70,7 +70,6 @@ const ImageFallback = ({ src, alt, fallbackSrc = '/images/placeholder.svg', styl
         width: width,
         height: height
       }}
-      imgStyle={imgStyle}
       onError={handleError}
       onLoad={handleLoad}
       fallback={resolvedFallbackSrc}
