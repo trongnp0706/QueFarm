@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { FaFilter, FaSort, FaThLarge, FaList } from 'react-icons/fa';
 import CategoryMenu from '../category/CategoryMenu';
 import ProductGrid from './ProductGrid';
@@ -10,7 +10,7 @@ import ImageFallback from '../../components/ImageFallback';
 function ProductList() {
   const { categorySlug } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
+  // Note: no direct navigation used in this component
   const [products, setProducts] = useState([]);
   const [allProducts, setAllProducts] = useState([]); // Store all products for filtering
   const [loading, setLoading] = useState(true);

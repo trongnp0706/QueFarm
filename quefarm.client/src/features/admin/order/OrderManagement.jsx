@@ -42,7 +42,7 @@ function OrderManagement() {
       const json = ct.includes('application/json') ? await res.json().catch(()=> null) : null;
       if (!json) throw new Error('Phản hồi không hợp lệ từ server');
       setData(json);
-    } catch (e) {
+      } catch {
       // Fallback rỗng để tránh crash UI
       setData({ orders: [], totalItems: 0, pageNumber: page, pageSize });
     } finally {

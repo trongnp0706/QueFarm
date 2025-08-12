@@ -41,7 +41,7 @@ const Dashboard = () => {
         } else {
           setStats({ totalOrders: 0, totalRevenue: 0, totalProducts: list.length });
         }
-      } catch (error) {
+      } catch {
         setStats({ totalOrders: 0, totalRevenue: 0, totalProducts: 0 });
       } finally {
         setLoading(false);

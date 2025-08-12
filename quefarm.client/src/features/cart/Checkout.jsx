@@ -47,8 +47,8 @@ function Checkout() {
     priceCart();
   }, [cart, voucher]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setLoading(true);
     setError(null);
     try {
@@ -73,8 +73,8 @@ function Checkout() {
       }
       setSuccess(true);
       clearCart();
-    } catch (err) {
-      setError(err.message);
+    } catch (error) {
+      setError(error.message);
     } finally {
       setLoading(false);
     }

@@ -28,24 +28,7 @@ axios.defaults.baseURL = API_BASE_URL;
 
 const API_URL = '/api/product';
 
-// Configure base URL for images
-const getImageBaseUrl = () => {
-  // Priority order:
-  // 1. VITE_API_BASE_URL environment variable
-  // 2. Use Vite proxy in development (relative URL)
-  // 3. Production: use current origin
-  if (import.meta.env.VITE_API_BASE_URL) {
-    return import.meta.env.VITE_API_BASE_URL.replace(/\/+$/, ''); // Remove trailing slashes
-  }
-
-  // For local development, use relative URL (Vite proxy will handle it)
-  if (window.location.hostname === 'localhost') {
-    return ''; // Use relative URL to leverage Vite proxy
-  }
-
-  // Production: use the current origin
-  return window.location.origin;
-};
+// (Unused legacy) getImageBaseUrl removed for lint cleanliness
 
 // Helper function to generate image URL - simplified for production
 export const generateImageUrl = (imageUrl) => {
@@ -208,7 +191,7 @@ export const createProductWithImages = async (productData, mainImage = null, add
 
 export const updateProductWithImages = async (id, productData, mainImage = null, additionalImages = []) => {
   // 1. Update product data first
-  const product = await updateProduct(id, productData);
+  await updateProduct(id, productData);
   
   try {
     // 2. Upload main image if provided
