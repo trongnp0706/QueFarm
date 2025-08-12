@@ -8,6 +8,7 @@ function Header() {
   const { cart } = useContext(CartContext);
   const [isMenuOpen, setIsMenuOpen] = useState(false); // State for mobile menu
   const [showLogin, setShowLogin] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -47,16 +48,28 @@ function Header() {
           </Link>
 
           <div className="hidden md:flex flex-1 mx-6">
-            <div className="relative w-full">
+            <form
+              className="relative w-full"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const q = searchTerm.trim();
+                if (q) navigate(`/search?q=${encodeURIComponent(q)}`);
+              }}
+            >
               <input
                 type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Tìm kiếm sản phẩm..."
                 className="w-full bg-white text-gray-800 border-2 border-brand-green-400 rounded-full px-6 py-3 focus:outline-none focus:ring-2 focus:ring-brand-yellow-400 placeholder-gray-500 transition-all"
               />
-              <button className="absolute right-0 top-0 h-full bg-transparent px-4 text-brand-green-600 hover:text-brand-green-700 transition-colors">
+              <button
+                type="submit"
+                className="absolute right-0 top-0 h-full bg-transparent px-4 text-brand-green-600 hover:text-brand-green-700 transition-colors"
+              >
                 <FiSearch className="text-xl" />
               </button>
-            </div>
+            </form>
           </div>
 
           <div className="flex items-center space-x-4">
@@ -124,17 +137,32 @@ function Header() {
         
         {/* Search bar for mobile */}
         <div className="md:hidden mt-3">
-            <div className="relative w-full">
-              <input
-                type="text"
-                placeholder="Tìm kiếm sản phẩm..."
-                className="w-full bg-white text-gray-800 border-2 border-brand-green-400 rounded-full px-6 py-3 focus:outline-none focus:ring-2 focus:ring-brand-yellow-400 placeholder-gray-500 transition-all"
-              />
-              <button className="absolute right-0 top-0 h-full bg-transparent px-4 text-brand-green-600 hover:text-brand-green-700 transition-colors">
-                <FiSearch className="text-xl" />
-              </button>
-            </div>
-          </div>
+          <form
+            className="relative w-full"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const q = searchTerm.trim();
+              if (q) {
+                navigate(`/search?q=${encodeURIComponent(q)}`);
+                setIsMenuOpen(false);
+              }
+            }}
+          >
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Tìm kiếm sản phẩm..."
+              className="w-full bg-white text-gray-800 border-2 border-brand-green-400 rounded-full px-6 py-3 focus:outline-none focus:ring-2 focus:ring-brand-yellow-400 placeholder-gray-500 transition-all"
+            />
+            <button
+              type="submit"
+              className="absolute right-0 top-0 h-full bg-transparent px-4 text-brand-green-600 hover:text-brand-green-700 transition-colors"
+            >
+              <FiSearch className="text-xl" />
+            </button>
+          </form>
+        </div>
       </div>
       <AdminLoginModal open={showLogin} onClose={() => setShowLogin(false)} onSuccess={() => navigate('/admin')} />
     </header>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FiArrowRight } from 'react-icons/fi';
 import { getFeaturedProducts, getAllProducts, generateImageUrl } from '../services/productService';
+import ProductGrid from '../features/product/ProductGrid';
 
 function ProductSection({ title, products, viewAllLink, loading = false }) {
   return (
@@ -15,73 +16,13 @@ function ProductSection({ title, products, viewAllLink, loading = false }) {
         </h2>
       </div>
       
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 product-grid">
-        {loading ? (
-          [...Array(8)].map((_, index) => (
-            <div key={index} className="bg-white rounded-xl overflow-hidden border border-brand-cream-300 shadow-sm product-card">
-              <div className="product-image-container">
-                <div className="bg-brand-cream-200 animate-pulse w-full h-full"></div>
-              </div>
-              <div className="product-content">
-                <div className="h-4 bg-brand-cream-200 rounded animate-pulse mb-2"></div>
-                <div className="h-3 bg-brand-cream-200 rounded animate-pulse w-3/4 mb-3"></div>
-                <div className="flex justify-between items-center mb-3">
-                  <div className="h-3 bg-brand-cream-200 rounded animate-pulse w-16"></div>
-                  <div className="h-6 bg-brand-cream-200 rounded animate-pulse w-12"></div>
-                </div>
-                <div className="h-10 bg-brand-cream-200 rounded-lg animate-pulse"></div>
-              </div>
-            </div>
-          ))
-        ) : (
-          products.map(product => (
-            <div key={product.id} className="group relative">
-              {product.discountPercentage > 0 && (
-                <div className="discount-badge">
-                  -{Math.round(product.discountPercentage)}%
-                </div>
-              )}
-              <div className="bg-white rounded-xl overflow-hidden border border-brand-cream-300 hover:border-brand-green-500 hover:shadow-xl transition-all duration-300 shadow-sm product-card">
-                <Link to={`/product/${product.id}`} className="block overflow-hidden">
-                  <div className="product-image-container">
-                    <ImageFallback 
-                      src={product.imageUrl} 
-                      alt={product.name}
-                      className="product-image"
-                      fallbackSrc="/images/placeholder.svg"
-                    />
-                  </div>
-                </Link>
-                <div className="product-content">
-                  <h3 className="product-title group-hover:text-brand-green-700 transition-colors line-clamp-2 leading-tight">
-                    <Link to={`/product/${product.id}`} className="hover:text-brand-green-700">
-                      {product.name}
-                    </Link>
-                  </h3>
-                  <div className="flex justify-between items-center mb-2">
-                    <div className="flex flex-col">
-                      {product.originalPrice && (
-                        <span className="product-original-price">
-                          {product.originalPrice.toLocaleString()}₫
-                        </span>
-                      )}
-                      <span className="product-price">
-                        {product.price.toLocaleString()}₫
-                      </span>
-                    </div>
-                  </div>
-                  <Link 
-                    to={`/product/${product.id}`}
-                    className="btn-primary text-center mt-auto"
-                  >
-                    MUA NGAY
-                  </Link>
-                </div>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
+      {/* Homepage: enforce 4 columns at md+ so card size matches products page */}
+      <ProductGrid 
+        products={products} 
+        loading={loading} 
+        itemsPerPage={12}
+        containerClassName="bg-[#f9f5f0] p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4"
+      />
       
       {viewAllLink && !loading && (
         <div className="text-center mt-8">

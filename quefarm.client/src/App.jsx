@@ -1,5 +1,5 @@
 import { CartProvider } from './context/CartContext.jsx';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 
 // Layouts
 import MainLayout from './layouts/MainLayout.jsx';
@@ -38,6 +38,11 @@ const NotFoundPage = () => (
 
 
 function App() {
+  const RequireAdminAuth = () => {
+    const token = localStorage.getItem('adminToken');
+    if (!token) return <Navigate to="/admin/login" replace />;
+    return <Outlet />;
+  };
   return (
     <CartProvider>
       <Router>
@@ -63,14 +68,16 @@ function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Route>
           
-          {/* Admin Routes */}
-          <Route path="/admin" element={<AdminLayout />}>
+          {/* Admin Routes (protected) */}
+          <Route element={<RequireAdminAuth />}>
+            <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="products/*" element={<ProductManagement />} />
             <Route path="categories/*" element={<CategoryManagement />} />
             <Route path="orders" element={<OrderManagement />} />
             <Route path="orders/:id" element={<OrderDetailPage />} />
             <Route path="*" element={<div>Page not found in Admin</div>} />
+            </Route>
           </Route>
           
           {/* Admin Login Route (no layout) */}

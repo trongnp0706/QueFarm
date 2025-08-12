@@ -181,9 +181,11 @@ footer {
 }
 
 /* Fixed image sizes to prevent layout shifts */
+
 .product-image-container {
   width: 100%;
-  height: 200px; /* Mobile-first height */
+  /* Contain the image slot at a fixed height to align cards */
+  height: 240px; /* base height for small screens */
   background-color: white;
   display: flex;
   align-items: center;
@@ -195,21 +197,17 @@ footer {
 
 /* Responsive image height */
 @media (min-width: 768px) {
-  .product-image-container {
-    height: 250px; /* Medium screens */
-  }
+  .product-image-container { height: 260px; }
 }
 
 @media (min-width: 1024px) {
-  .product-image-container {
-    height: 300px; /* Large screens */
-  }
+  .product-image-container { height: 280px; }
 }
 
 .product-image {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Changed from contain to cover for better appearance */
+  object-fit: cover;
   transition: transform 0.3s ease;
   background-color: white;
 }
@@ -383,6 +381,34 @@ footer {
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
+/* Secondary button variant for less prominent actions (e.g., Add to cart) */
+.btn-secondary {
+  background: #ffffff;
+  color: #166534; /* brand-green-800 */
+  border: 2px solid #22a043; /* brand-green-600 */
+  font-weight: 600;
+  padding: 0.5rem 0.625rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  font-size: 0.8125rem;
+  min-height: 2.25rem;
+}
+
+.btn-secondary:hover {
+  background: #f0fdf2; /* brand-green-50 */
+  border-color: #16a34a; /* brand-green-600 stronger */
+  transform: translateY(-1px);
+  box-shadow: 0 6px 10px -4px rgba(0, 0, 0, 0.08);
+}
+
+/* Icon spacing helper */
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem; /* 6px */
+}
+
 /* Mobile-specific improvements */
 @media (max-width: 767px) {
   /* Ensure touch-friendly buttons */
@@ -464,23 +490,7 @@ footer {
   }
 }
 
-/* Dark mode support (if needed in future) */
-@media (prefers-color-scheme: dark) {
-  .product-card {
-    background-color: #1f2937;
-    border-color: #374151;
-  }
-  
-  .product-title {
-    color: #f9fafb;
-  }
-  
-  .product-image-placeholder {
-    background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
-    border-color: #6b7280;
-    color: #9ca3af;
-  }
-}
+/* Dark mode styles removed to enforce consistent light theme for products */
 
 /* Banner image fixes */
 .banner-customer-image {

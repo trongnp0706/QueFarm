@@ -235,36 +235,6 @@ function ProductList() {
 
   return (
     <>
-      {/* Hero Section for Products Page */}
-      <div className="relative bg-gradient-to-r from-green-700 via-green-600 to-green-500 text-white">
-        <div className="absolute inset-0 bg-black opacity-20"></div>
-        <div className="relative container mx-auto px-4 py-16">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Đặc Sản Vùng Miền Việt Nam
-            </h1>
-            <p className="text-xl md:text-2xl mb-6 opacity-90">
-              Tinh hoa ẩm thực từ Bắc đến Nam
-            </p>
-            <div className="flex justify-center items-center space-x-8 text-sm md:text-base">
-              <div className="flex items-center">
-                <div className="w-3 h-3 bg-yellow-400 rounded-full mr-2"></div>
-                <span>Chính gốc</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-3 h-3 bg-yellow-400 rounded-full mr-2"></div>
-                <span>Chất lượng cao</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-3 h-3 bg-yellow-400 rounded-full mr-2"></div>
-                <span>Giao hàng tận nơi</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-
 
       <div className="bg-gray-50 min-h-screen">
         <div className="container mx-auto px-4 py-8">

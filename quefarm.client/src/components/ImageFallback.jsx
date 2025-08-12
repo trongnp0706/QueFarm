@@ -22,7 +22,7 @@ const resolveImageUrl = (src) => {
   return normalizedSrc;
 };
 
-const ImageFallback = ({ src, alt, fallbackSrc = '/images/placeholder.svg', style, width, height, debug = false, className, imgStyle, imgClassName, ...props }) => {
+const ImageFallback = ({ src, alt, fallbackSrc = '/images/placeholder.svg', style, width, height, debug = false, className, imgStyle, imgClassName, preview = false, ...props }) => {
   const [imageError, setImageError] = useState(false);
   const resolvedSrc = resolveImageUrl(src);
   const resolvedFallbackSrc = resolveImageUrl(fallbackSrc);
@@ -52,7 +52,10 @@ const ImageFallback = ({ src, alt, fallbackSrc = '/images/placeholder.svg', styl
   // If image failed to load, show custom placeholder
   if (imageError || !currentSrc) {
     return (
-      <div className={`product-image-placeholder ${className || ''}`}>
+      <div
+        className={`product-image-placeholder ${className || ''}`}
+        style={{ width: width, height: height, ...style }}
+      >
         <div className="text-center">
           <FaImage className="mx-auto mb-2 text-4xl text-gray-400" />
           <p className="text-sm text-gray-500">Không có ảnh</p>
@@ -73,8 +76,10 @@ const ImageFallback = ({ src, alt, fallbackSrc = '/images/placeholder.svg', styl
       onError={handleError}
       onLoad={handleLoad}
       fallback={resolvedFallbackSrc}
-      preview={false}
+      preview={preview}
       className={className}
+      imgStyle={imgStyle}
+      imgClassName={imgClassName}
       {...props}
     />
   );
