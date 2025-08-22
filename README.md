@@ -111,13 +111,16 @@ QueFarm/
 
 ```bash
 # Database
-ConnectionStrings__DefaultConnection=Server=sqlserver;Database=QueFarmDb;User Id=sa;Password=<password>;TrustServerCertificate=true;
+DB_CONNECTION_STRING=Server=sqlserver;Database=QueFarmDb;User Id=sa;Password=<password>;TrustServerCertificate=true;
 
-# JWT Settings
-JwtSettings__SecretKey=<256-bit-key>
-JwtSettings__Issuer=QueFarm
-JwtSettings__Audience=QueFarmUsers
-JwtSettings__ExpirationInMinutes=30
+# JWT Settings (Backend)
+JWT_SECRET=<256-bit-key>
+JWT_ISSUER=QueFarm
+JWT_AUDIENCE=QueFarmUsers
+JWT_EXP_MINUTES=30
+
+# CORS
+CORS_ALLOWED_ORIGINS=https://quefarm.page;https://www.quefarm.page
 
 # Environment
 ASPNETCORE_ENVIRONMENT=Production

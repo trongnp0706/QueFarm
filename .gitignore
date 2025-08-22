@@ -8,6 +8,9 @@
 .env.local
 .env.development
 .env.production
+.env.*
+.docker.env
+docker.env
 
 # User-specific files
 *.rsuser
@@ -374,3 +377,9 @@ backups/
 api-*/
 frontend/
 source/
+ 
+# QueFarm: ignore sensitive operational docs and HTTP request files
+# Prevent accidental commit of server operational doc containing real secrets
+QUEFARM_SERVER_DOCUMENTATION.md
+# Ignore HTTP request collection files
+QueFarm.Server/QueFarm.Server.http

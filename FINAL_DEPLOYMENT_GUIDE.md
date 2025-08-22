@@ -246,6 +246,30 @@ npm run build
 
 # Upload to server
 scp -r dist/* root@your-server-ip:/var/www/quefarm/
+
+### 7. Tạo file môi trường an toàn
+
+Tạo file `.env` (không commit) tại thư mục dự án (cùng cấp với `docker-compose.yml`):
+
+```env
+# Server
+ASPNETCORE_ENVIRONMENT=Production
+
+# Database
+SA_PASSWORD=<strong-32-characters>
+DB_CONNECTION_STRING=Server=sqlserver;Database=QueFarmDb;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=true;
+
+# JWT
+JWT_SECRET=<random-256-bit>
+JWT_ISSUER=QueFarm
+JWT_AUDIENCE=QueFarmUsers
+JWT_EXP_MINUTES=30
+
+# CORS
+CORS_ALLOWED_ORIGINS=https://quefarm.page;https://www.quefarm.page
+```
+
+Chạy `docker-compose` với file `.env` này sẽ tự inject vào container.
 ```
 
 ---
@@ -308,7 +332,7 @@ docker exec quefarm-sqlserver-1 /opt/mssql-tools/bin/sqlcmd \
 #!/bin/bash
 DATE=$(date +%Y%m%d_%H%M%S)
 docker exec quefarm-sqlserver-1 /opt/mssql-tools/bin/sqlcmd \
-  -S localhost -U sa -P '7lZOGuxPe9Td65LQqeFuX9pc5oYxgT2w' \
+  -S localhost -U sa -P '${SA_PASSWORD}' \
   -Q "BACKUP DATABASE QueFarmDb TO DISK = '/var/opt/mssql/backup/QueFarmDb_$DATE.bak'"
 ```
 

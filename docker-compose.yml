@@ -5,13 +5,14 @@ services:
       - "8080:80"
       - "8443:443"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Production}
       - ASPNETCORE_HTTP_PORTS=80
-      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=QueFarmDb;User Id=sa;Password=7lZOGuxPe9Td65LQqeFuX9pc5oYxgT2w;TrustServerCertificate=true;
-      - JwtSettings__SecretKey=d0Oa9zcHAPVfMDCHGxMEyfhAlTXuX2Pn7svFQCXrPhAC
-      - JwtSettings__Issuer=QueFarm
-      - JwtSettings__Audience=QueFarmUsers
-      - JwtSettings__ExpirationInMinutes=30
+      - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING}
+      - JwtSettings__SecretKey=${JWT_SECRET}
+      - JwtSettings__Issuer=${JWT_ISSUER:-QueFarm}
+      - JwtSettings__Audience=${JWT_AUDIENCE:-QueFarmUsers}
+      - JwtSettings__ExpirationInMinutes=${JWT_EXP_MINUTES:-30}
+      - Cors__AllowedOrigins=${CORS_ALLOWED_ORIGINS:-https://quefarm.page;https://www.quefarm.page}
     depends_on:
       sqlserver:
         condition: service_healthy
@@ -25,7 +26,7 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=7lZOGuxPe9Td65LQqeFuX9pc5oYxgT2w
+      - SA_PASSWORD=${SA_PASSWORD}
       - MSSQL_PID=Express
     ports:
       - "1433:1433"

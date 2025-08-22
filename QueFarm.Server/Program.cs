@@ -13,6 +13,10 @@ using QueFarm.Server.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Load configuration from environment for production secrets fallback
+builder.Configuration
+    .AddEnvironmentVariables();
+
 // Add services to the container.
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -77,6 +81,13 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 // Add CORS - DEVELOPMENT & PRODUCTION POLICIES
 builder.Services.AddCors(options =>
 {
+    // Read production allowed origins from configuration or environment
+    // Accept a comma/semicolon/space separated list in configuration key: "Cors:AllowedOrigins" (env var: Cors__AllowedOrigins)
+    var corsAllowedOriginsRaw = builder.Configuration["Cors:AllowedOrigins"];
+    var productionAllowedOrigins = string.IsNullOrWhiteSpace(corsAllowedOriginsRaw)
+        ? new[] { "https://quefarm.page", "https://www.quefarm.page" }
+        : corsAllowedOriginsRaw.Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
     // Development Policy
     options.AddPolicy("DevelopmentPolicy", policy =>
     {
@@ -92,7 +103,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("ProductionPolicy", policy =>
     {
         policy
-            .WithOrigins("https://quefarm.page", "https://www.quefarm.page")
+            .WithOrigins(productionAllowedOrigins)
             .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
             .WithHeaders("Content-Type", "Authorization", "Accept")
             .AllowCredentials()
@@ -117,7 +128,11 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = jwtSettings["Issuer"],
         ValidAudience = jwtSettings["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey is required")))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+            string.IsNullOrWhiteSpace(jwtSettings["SecretKey"]) 
+                ? throw new InvalidOperationException("JWT SecretKey is required") 
+                : jwtSettings["SecretKey"]
+        ))
     };
 });
 

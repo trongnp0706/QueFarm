@@ -1,0 +1,16 @@
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'FINAL_DEPLOYMENT_GUIDE.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'QueFarm.Server/Program.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'QueFarm.Server/appsettings.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docker-compose.yml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'quefarm.client/.gitignore', LF will be replaced by CRLF the next time Git touches it
+ .gitignore                                 | 11 [32m++++++++++[m[31m-[m
+ FINAL_DEPLOYMENT_GUIDE.md                  | 26 [32m+++++++++++++++++++++++++[m[31m-[m
+ QueFarm.Server/Program.cs                  | 19 [32m+++++++++++++++++[m[31m--[m
+ QueFarm.Server/appsettings.Production.json |  9 [32m++++++[m[31m---[m
+ QueFarm.Server/appsettings.json            |  2 [32m+[m[31m-[m
+ README.md                                  | 15 [32m+++++++++[m[31m------[m
+ docker-compose.yml                         | 15 [32m++++++++[m[31m-------[m
+ quefarm.client/.gitignore                  |  4 [32m++++[m
+ 8 files changed, 80 insertions(+), 21 deletions(-)
