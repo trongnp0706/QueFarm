@@ -12,6 +12,10 @@ import CategoryPage from './pages/CategoryPage';
 import ProductList from './features/product/ProductList';
 import Cart from './features/cart/Cart';
 import Checkout from './features/cart/Checkout';
+import AboutPage from './pages/AboutPage.jsx';
+import PromotionPage from './pages/PromotionPage.jsx';
+import SupportPage from './pages/SupportPage.jsx';
+import ContactPage from './pages/ContactPage.jsx';
 
 // Admin Pages
 import AdminLogin from './pages/LoginPage';
@@ -59,10 +63,10 @@ function App() {
             <Route path="checkout" element={<Checkout />} />
             
             {/* Static Pages */}
-            <Route path="about" element={<StaticPage title="Giới Thiệu" />} />
-            <Route path="contact" element={<StaticPage title="Liên Hệ" />} />
-            <Route path="promotion" element={<StaticPage title="Khuyến Mãi" />} />
-            <Route path="help" element={<StaticPage title="Hỗ Trợ Mua Hàng" />} />
+            <Route path="about" element={<AboutPage />} />
+            <Route path="contact" element={<ContactPage />} />
+            <Route path="promotion" element={<PromotionPage />} />
+            <Route path="help" element={<SupportPage />} />
             
             {/* 404 Route */}
             <Route path="*" element={<NotFoundPage />} />
