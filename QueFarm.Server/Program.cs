@@ -10,6 +10,9 @@ using QueFarm.Server.Core.Domain.Interfaces;
 using QueFarm.Server.Infrastructure.Repositories;
 using QueFarm.Server.Application.Mappings;
 using QueFarm.Server.Data;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
+using QueFarm.Server.Core.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,6 +68,10 @@ builder.Services.AddDbContext<QueFarmDbContext>(options =>
 
 // Register AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
+
+// Bind Email settings and register email service
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 
 // Register repositories
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));

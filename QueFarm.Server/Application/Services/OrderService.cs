@@ -3,16 +3,22 @@ using QueFarm.Server.Core.Domain.Entities;
 using QueFarm.Server.Core.DTOs;
 using QueFarm.Server.Core.Services;
 using QueFarm.Server.Data;
+using Microsoft.Extensions.Options;
+using System.Net;
 
 namespace QueFarm.Server.Application.Services
 {
     public class OrderService : IOrderService
     {
         private readonly QueFarmDbContext _db;
+        private readonly IEmailService _emailService;
+        private readonly EmailSettings _emailSettings;
 
-        public OrderService(QueFarmDbContext db)
+        public OrderService(QueFarmDbContext db, IEmailService emailService, IOptions<EmailSettings> emailOptions)
         {
             _db = db;
+            _emailService = emailService;
+            _emailSettings = emailOptions.Value;
         }
 
         public async Task<PriceCartResponse> PriceCartAsync(PriceCartRequest request)
@@ -118,6 +124,46 @@ namespace QueFarm.Server.Application.Services
 
             _db.OrderItems.AddRange(orderItems);
             await _db.SaveChangesAsync();
+
+            try
+            {
+                var adminEmail = string.IsNullOrWhiteSpace(_emailSettings.ToAdmin) ? "quefarmfood@gmail.com" : _emailSettings.ToAdmin;
+                var subject = $"[QueFarm] Đơn hàng mới #{order.Id} - {order.CustomerName}";
+                var itemsRows = string.Join("", orderItems.Select(i => $"<tr><td style='padding:6px 8px;border:1px solid #ddd'>{WebUtility.HtmlEncode(i.ProductName)}</td><td style='padding:6px 8px;border:1px solid #ddd;text-align:right'>{i.Quantity}</td><td style='padding:6px 8px;border:1px solid #ddd;text-align:right'>{i.Price:N0}</td><td style='padding:6px 8px;border:1px solid #ddd;text-align:right'>{i.Subtotal:N0}</td></tr>"));
+                var body = $@"<div style='font-family:Arial,Helvetica,sans-serif'>
+                    <h2>Đơn hàng mới #{order.Id}</h2>
+                    <p><strong>Khách hàng:</strong> {WebUtility.HtmlEncode(order.CustomerName)}</p>
+                    <p><strong>SĐT:</strong> {WebUtility.HtmlEncode(order.Phone)}</p>
+                    <p><strong>Địa chỉ:</strong> {WebUtility.HtmlEncode(order.Address)}</p>
+                    {(string.IsNullOrWhiteSpace(order.Email) ? string.Empty : $"<p><strong>Email:</strong> {WebUtility.HtmlEncode(order.Email)}</p>")}
+                    {(string.IsNullOrWhiteSpace(order.Notes) ? string.Empty : $"<p><strong>Ghi chú:</strong> {WebUtility.HtmlEncode(order.Notes!)}</p>")}
+                    <p><strong>Thời gian:</strong> {order.OrderDate:yyyy-MM-dd HH:mm:ss} UTC</p>
+                    <table style='border-collapse:collapse;margin-top:12px'>
+                        <thead>
+                            <tr>
+                                <th style='padding:6px 8px;border:1px solid #ddd;text-align:left'>Sản phẩm</th>
+                                <th style='padding:6px 8px;border:1px solid #ddd;text-align:right'>SL</th>
+                                <th style='padding:6px 8px;border:1px solid #ddd;text-align:right'>Đơn giá</th>
+                                <th style='padding:6px 8px;border:1px solid #ddd;text-align:right'>Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>{itemsRows}</tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan='3' style='padding:6px 8px;border:1px solid #ddd;text-align:right'><strong>Tổng cộng</strong></td>
+                                <td style='padding:6px 8px;border:1px solid #ddd;text-align:right'><strong>{pricing.Total:N0}</strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>";
+                
+                await _emailService.SendAsync(adminEmail, subject, body);
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't block order creation
+                Console.WriteLine($"[EmailError] Failed to send order notification: {ex.Message}");
+            }
 
             return order.Id;
         }
