@@ -84,6 +84,7 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IProductImportService, ProductImportService>();
 
 // Add CORS - DEVELOPMENT & PRODUCTION POLICIES
 builder.Services.AddCors(options =>

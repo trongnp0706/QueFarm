@@ -12,10 +12,12 @@ namespace QueFarm.Server.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IProductService _productService;
+        private readonly IProductImportService _importService;
 
-        public ProductController(IProductService productService)
+        public ProductController(IProductService productService, IProductImportService importService)
         {
             _productService = productService;
+            _importService = importService;
         }
 
         // GET: api/product
@@ -371,6 +373,79 @@ namespace QueFarm.Server.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Import products from Excel file
+        /// </summary>
+        /// <param name="excelFile">Excel file containing product data</param>
+        /// <param name="overwriteExisting">Whether to overwrite existing products with same name</param>
+        /// <returns>Import result with success/error counts and details</returns>
+        [HttpPost("import")]
+        [Consumes("multipart/form-data")]
+        [ProducesResponseType(typeof(ProductImportResponse), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
+        [Authorize]
+        public async Task<IActionResult> ImportFromExcel([FromForm] IFormFile excelFile, [FromForm] bool overwriteExisting = false)
+        {
+            try
+            {
+                // Validate file
+                if (excelFile == null || excelFile.Length == 0)
+                    return BadRequest("Vui lòng chọn file Excel để import");
+
+                var allowedTypes = new[] { 
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
+                    "application/vnd.ms-excel" // .xls
+                };
+                
+                if (!allowedTypes.Contains(excelFile.ContentType))
+                    return BadRequest("File phải là định dạng Excel (.xlsx hoặc .xls)");
+
+                if (excelFile.Length > 10 * 1024 * 1024) // 10MB
+                    return BadRequest("File không được vượt quá 10MB");
+
+                // Process import
+                using var stream = excelFile.OpenReadStream();
+                var result = await _importService.ImportFromExcelAsync(stream, overwriteExisting);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { 
+                    error = "Lỗi xử lý file Excel", 
+                    message = ex.Message 
+                });
+            }
+        }
+
+        /// <summary>
+        /// Download Excel template for product import
+        /// </summary>
+        /// <returns>Excel template file</returns>
+        [HttpGet("import/template")]
+        [ProducesResponseType(typeof(FileContentResult), 200)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> DownloadImportTemplate()
+        {
+            try
+            {
+                var templateBytes = await _importService.GenerateTemplateAsync();
+                var fileName = $"QueFarm_Product_Import_Template_{DateTime.Now:yyyyMMdd}.xlsx";
+                
+                return File(templateBytes, 
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
+                    fileName);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { 
+                    error = "Lỗi tạo template", 
+                    message = ex.Message 
+                });
             }
         }
     }

@@ -61,8 +61,32 @@ function ProductList() {
           productsData = await searchProducts(query);
         } else {
           // Get all products for products page
-          const response = await getAllProducts(1, 50);
-          productsData = response.items || [];
+          // Backend has pageSize limit of 50, so we paginate properly
+          let allProductsData = [];
+          let currentPage = 1;
+          const pageSize = 50; // Backend maximum limit
+          
+          while (true) {
+            const response = await getAllProducts(currentPage, pageSize);
+            const pageProducts = response.items || [];
+            
+            allProductsData = [...allProductsData, ...pageProducts];
+            
+            // Break if we've got all products (less than pageSize or reached total)
+            if (pageProducts.length < pageSize || allProductsData.length >= (response.totalCount || 0)) {
+              break;
+            }
+            
+            currentPage++;
+            
+            // Safety break to prevent infinite loop (max 20 pages = 1000 products)
+            if (currentPage > 20) {
+              console.warn('Reached maximum page limit for safety');
+              break;
+            }
+          }
+          
+          productsData = allProductsData;
         }
         
         // Ensure productsData is an array
@@ -236,48 +260,42 @@ function ProductList() {
   return (
     <>
 
-      <div className="bg-gray-50 min-h-screen">
+      <div className="bg-gray-50 min-h-screen products-main-content">
         <div className="container mx-auto px-4 py-8">
           
-          {/* Statistics Bar */}
-          <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-            <div className="flex flex-wrap items-center justify-between">
-              <div className="text-gray-600">
-                <span className="font-medium">{products.length}</span> sản phẩm được tìm thấy
-                {query && <span className="ml-2">cho từ khóa: <strong>"{query}"</strong></span>}
-              </div>
-              <div className="flex items-center space-x-4 mt-2 md:mt-0">
-                <div className="flex items-center text-sm text-gray-500">
-                  <span className="w-2 h-2 bg-red-500 rounded-full mr-1"></span>
-                  Hot
-                </div>
-                <div className="flex items-center text-sm text-gray-500">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
-                  Mới
-                </div>
-              </div>
-            </div>
-          </div>
+
 
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Enhanced Sidebar with filters */}
             <div className="lg:w-1/4">
               <div className="sticky top-4">
-                <CategoryMenu 
-              onSelect={handleCategorySelect} 
+                            <CategoryMenu 
+              onSelect={handleCategorySelect}
               activeCategory={selectedCategory}
               isProductsPage={!categorySlug}
-              className="mb-6" 
+              className="mb-6"
+              productCount={products.length}
+              searchQuery={query}
             />
                 
-                <div className="bg-white rounded-lg shadow-sm mb-6 overflow-hidden">
+                <div className="bg-white rounded-lg shadow-sm mb-6 overflow-hidden filter-section">
                   <div className="bg-gradient-to-r from-green-700 to-green-600 text-white py-4 px-4 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <FaFilter />
                       <span className="font-bold">BỘ LỌC SẢN PHẨM</span>
                     </div>
+                    <div className="flex items-center space-x-3">
+                      <div className="flex items-center text-sm">
+                        <span className="w-2 h-2 bg-red-400 rounded-full mr-1"></span>
+                        Hot
+                      </div>
+                      <div className="flex items-center text-sm">
+                        <span className="w-2 h-2 bg-yellow-400 rounded-full mr-1"></span>
+                        Mới
+                      </div>
+                    </div>
                     <button 
-                      className="lg:hidden text-white hover:text-yellow-300 transition-colors"
+                      className="lg:hidden text-white hover:text-yellow-300 transition-colors px-2 py-1 rounded text-sm"
                       onClick={() => setShowFilters(!showFilters)}
                     >
                       {showFilters ? '−' : '+'}

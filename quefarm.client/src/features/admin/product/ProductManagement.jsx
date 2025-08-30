@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import AdminProductList from './AdminProductList';
 import AddProduct from './AddProduct';
 import EditProduct from './EditProduct';
+import ImportProducts from './ImportProducts';
 
 const ProductManagement = () => {
   return (
@@ -10,6 +11,7 @@ const ProductManagement = () => {
       <Route index element={<AdminProductList />} />
       <Route path="add" element={<AddProduct />} />
       <Route path="edit/:id" element={<EditProduct />} />
+      <Route path="import" element={<ImportProducts />} />
       <Route path="*" element={<Navigate to="/admin/products" replace />} />
     </Routes>
   );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Table, Space, Button, Input, Popconfirm, message, Select, Card, Tag } from 'antd';
-import { EditOutlined, DeleteOutlined, SearchOutlined, PlusOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, SearchOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import ImageFallback from '../../../components/ImageFallback';
 import { getAllProducts, deleteProduct } from '../../../services/productService';
@@ -107,6 +107,11 @@ const AdminProductList = () => {
     navigate('/admin/products/add');
   };
 
+  // Import products
+  const handleImportProducts = () => {
+    navigate('/admin/products/import');
+  };
+
   // Define table columns
   const columns = [
     {
@@ -207,9 +212,14 @@ const AdminProductList = () => {
           style={{ width: 300 }}
           prefix={<SearchOutlined />}
         />
-        <Button type="primary" icon={<PlusOutlined />} onClick={handleAddProduct}>
-          Thêm sản phẩm
-        </Button>
+        <Space>
+          <Button icon={<UploadOutlined />} onClick={handleImportProducts}>
+            Import Excel
+          </Button>
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleAddProduct}>
+            Thêm sản phẩm
+          </Button>
+        </Space>
       </div>
       <Table
         columns={columns}

@@ -285,6 +285,36 @@ export const updateProductWithImagesDirect = async (id, productData, mainImage =
   return response.data;
 };
 
+// Import functions
+export const downloadImportTemplate = async () => {
+  const token = localStorage.getItem('adminToken');
+  const response = await fetch(`${API_URL}/import/template`, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  
+  if (!response.ok) {
+    throw new Error('Không thể tải template');
+  }
+  
+  return response;
+};
+
+export const importProductsFromExcel = async (excelFile, overwriteExisting = false) => {
+  const formData = new FormData();
+  formData.append('excelFile', excelFile);
+  formData.append('overwriteExisting', overwriteExisting);
+
+  const response = await api.post(`${API_URL}/import`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  
+  return response.data;
+};
+
 const productService = {
   getAllProducts,
   getProductById,
@@ -304,7 +334,10 @@ const productService = {
   updateProductWithImages,
   // New direct image upload functions
   createProductWithImagesDirect,
-  updateProductWithImagesDirect
+  updateProductWithImagesDirect,
+  // Import functions
+  downloadImportTemplate,
+  importProductsFromExcel
 };
 
 export default productService; 

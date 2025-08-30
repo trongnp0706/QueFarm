@@ -834,3 +834,201 @@ footer {
   font-size: 1.125rem;
   margin-left: 1rem;
 }
+
+/* Admin Layout Responsive Styles */
+@media (max-width: 768px) {
+  .ant-layout-header {
+    padding: 0 12px !important;
+  }
+  
+  .ant-layout-sider {
+    display: none !important;
+  }
+  
+  .ant-card {
+    margin: 0 !important;
+    border-radius: 0 !important;
+  }
+  
+  .ant-card-head-title {
+    font-size: 16px !important;
+  }
+  
+  .ant-card-body {
+    padding: 16px !important;
+  }
+  
+  .ant-table {
+    font-size: 12px !important;
+  }
+  
+  .ant-table-thead > tr > th {
+    padding: 8px 4px !important;
+    font-size: 11px !important;
+  }
+  
+  .ant-table-tbody > tr > td {
+    padding: 8px 4px !important;
+    font-size: 11px !important;
+  }
+  
+  .ant-btn {
+    padding: 4px 8px !important;
+    font-size: 12px !important;
+    height: auto !important;
+  }
+  
+  .ant-btn-lg {
+    padding: 6px 12px !important;
+    font-size: 14px !important;
+    height: auto !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .ant-card-head {
+    padding: 0 12px !important;
+    min-height: 48px !important;
+  }
+  
+  .ant-card-head-title {
+    font-size: 14px !important;
+  }
+  
+  .ant-card-body {
+    padding: 12px !important;
+  }
+  
+  .ant-steps {
+    margin-bottom: 16px !important;
+  }
+  
+  .ant-steps-item-title {
+    font-size: 12px !important;
+  }
+  
+  .ant-upload-drag {
+    padding: 12px !important;
+  }
+  
+  .ant-upload-drag-icon {
+    margin-bottom: 8px !important;
+  }
+  
+  .ant-col {
+    margin-bottom: 12px !important;
+  }
+}
+
+/* Smooth transitions for admin layout */
+.ant-layout-sider {
+  transition: all 0.3s cubic-bezier(0.2, 0, 0, 1) !important;
+}
+
+.ant-menu {
+  transition: all 0.3s cubic-bezier(0.2, 0, 0, 1) !important;
+}
+
+/* Fixed Admin Layout Styles */
+.ant-layout-header {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 1000 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+}
+
+.ant-layout-sider-has-trigger {
+  position: fixed !important;
+  left: 0 !important;
+  top: 64px !important;
+  bottom: 0 !important;
+  z-index: 999 !important;
+  height: calc(100vh - 64px) !important;
+}
+
+/* Ensure body doesn't scroll when sidebar is fixed */
+body {
+  overflow-x: hidden;
+}
+
+/* Admin content area adjustments */
+.admin-content-area {
+  transition: margin-left 0.3s cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* Mobile drawer overlay */
+@media (max-width: 768px) {
+  .ant-layout-sider {
+    position: relative !important;
+    height: auto !important;
+  }
+}
+
+/* Custom scrollbar for admin content */
+.ant-layout-content {
+  scrollbar-width: thin;
+  scrollbar-color: #d9d9d9 transparent;
+}
+
+.ant-layout-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ant-layout-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ant-layout-content::-webkit-scrollbar-thumb {
+  background-color: #d9d9d9;
+  border-radius: 3px;
+}
+
+ .ant-layout-content::-webkit-scrollbar-thumb:hover {
+   background-color: #bfbfbf;
+ }
+
+/* Main Site Layout Adjustments for Sticky Header */
+.header-container {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+/* Ensure content doesn't get hidden behind sticky header */
+body {
+  scroll-padding-top: 140px;
+}
+
+/* Category menu adjustments - prevent overlap with sticky header */
+.category-menu-container {
+  scroll-margin-top: 140px;
+  margin-top: 1rem;
+}
+
+/* Product content adjustments */
+.products-main-content {
+  scroll-margin-top: 140px;
+  padding-top: 0.5rem;
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Additional scroll margin for sections */
+.content-section {
+  scroll-margin-top: 140px;
+}
+
+/* Fix for category menu positioning when scrolling */
+.products-page-content {
+  margin-top: 1rem;
+}
+
+/* Ensure filters and categories don't get hidden */
+.filter-section {
+  scroll-margin-top: 140px;
+}
