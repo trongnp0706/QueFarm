@@ -136,16 +136,42 @@ function HomePage() {
                 originalPrice: product.originalPrice,
                 name: product.name || 'Sản phẩm không tên',
                 discountPercentage: product.discount || product.Discount || product.discountPercentage || 0,
-                region: product.category?.name // Assuming category name holds region
+                region: product.region || product.Region || product.category?.name || 'Chưa xác định',
+                createdAt: product.createdAt || product.CreatedAt,
+                rating: product.rating || product.Rating || 0
             };
         };
 
         const processedAllProducts = allProducts.map(processProduct);
         const processedFeaturedProducts = featuredProducts.map(processProduct);
 
-        setNewProducts(processedAllProducts.slice(0, 5));
-        setBestSellers(processedFeaturedProducts.slice(0, 10));
-        setRegionalProducts(processedAllProducts.filter(p => p.region && p.region.includes("Miền")).slice(0, 5));
+        // Sản phẩm mới: sắp xếp theo thời gian tạo (createdAt) mới nhất
+        const sortedNewProducts = processedAllProducts.sort((a, b) => {
+          const dateA = new Date(a.createdAt || '2024-01-01');
+          const dateB = new Date(b.createdAt || '2024-01-01');
+          return dateB - dateA;
+        });
+        setNewProducts(sortedNewProducts.slice(0, 8));
+
+        // Sản phẩm bán chạy: ưu tiên featured products, sau đó sắp xếp theo rating cao
+        const combinedForBestSellers = [...processedFeaturedProducts, ...processedAllProducts]
+          .filter((product, index, self) => index === self.findIndex(p => p.id === product.id)) // remove duplicates
+          .sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        setBestSellers(combinedForBestSellers.slice(0, 8));
+
+        // Đặc sản vùng miền: lọc theo region hoặc category có chứa từ khóa liên quan đến vùng miền
+        const regionalProducts = processedAllProducts.filter(p => {
+          const region = p.region || '';
+          const categoryName = p.category?.name || '';
+          
+          // Kiểm tra region hoặc category name có chứa từ khóa vùng miền
+          const regionKeywords = ['Lâm Đồng', 'Đà Lạt', 'Hà Giang', 'Đồng bằng sông Cửu Long', 'Miền', 'Bắc', 'Trung', 'Nam'];
+          return regionKeywords.some(keyword => 
+            region.toLowerCase().includes(keyword.toLowerCase()) || 
+            categoryName.toLowerCase().includes(keyword.toLowerCase())
+          );
+        });
+        setRegionalProducts(regionalProducts.slice(0, 8));
         
       } catch (error) {
         console.error('Error fetching products:', error);
