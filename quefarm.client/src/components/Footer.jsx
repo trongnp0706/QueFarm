@@ -39,12 +39,10 @@ function Footer() {
         <div>
           <h3 className="font-bold text-xl mb-4 border-b-2 border-brand-green-400 pb-2 text-white">LIÊN KẾT NHANH</h3>
           <ul className="space-y-2">
-            <li><a href="#" className="text-gray-200 hover:text-brand-yellow-300 flex items-center transition-colors">› <span className="ml-2">Đặc sản 3 miền</span></a></li>
-            <li><a href="#" className="text-gray-200 hover:text-brand-yellow-300 flex items-center transition-colors">› <span className="ml-2">Đặc sản Tây Ninh</span></a></li>
             <li><a href="#" className="text-gray-200 hover:text-brand-yellow-300 flex items-center transition-colors">› <span className="ml-2">Đặc sản miền Nam</span></a></li>
             <li><a href="#" className="text-gray-200 hover:text-brand-yellow-300 flex items-center transition-colors">› <span className="ml-2">Đặc sản miền Trung</span></a></li>
             <li><a href="#" className="text-gray-200 hover:text-brand-yellow-300 flex items-center transition-colors">› <span className="ml-2">Đặc sản miền Bắc</span></a></li>
-            <li><a href="#" className="text-gray-200 hover:text-brand-yellow-300 flex items-center transition-colors">› <span className="ml-2">Combo Đặc sản</span></a></li>
+            <li><a href="#" className="text-gray-200 hover:text-brand-yellow-300 flex items-center transition-colors">› <span className="ml-2">Combo Quà Tặng</span></a></li>
           </ul>
         </div>
         

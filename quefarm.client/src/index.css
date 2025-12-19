@@ -998,19 +998,18 @@ body {
 
 /* Ensure content doesn't get hidden behind sticky header */
 body {
-  scroll-padding-top: 140px;
+  scroll-padding-top: 180px;
 }
 
 /* Category menu adjustments - prevent overlap with sticky header */
 .category-menu-container {
-  scroll-margin-top: 140px;
-  margin-top: 1rem;
+  scroll-margin-top: 180px;
+  margin-top: 0;
 }
 
 /* Product content adjustments */
 .products-main-content {
-  scroll-margin-top: 140px;
-  padding-top: 0.5rem;
+  scroll-margin-top: 180px;
 }
 
 /* Smooth scroll behavior */
@@ -1020,7 +1019,7 @@ html {
 
 /* Additional scroll margin for sections */
 .content-section {
-  scroll-margin-top: 140px;
+  scroll-margin-top: 180px;
 }
 
 /* Fix for category menu positioning when scrolling */
@@ -1030,5 +1029,18 @@ html {
 
 /* Ensure filters and categories don't get hidden */
 .filter-section {
-  scroll-margin-top: 140px;
+  scroll-margin-top: 180px;
+}
+
+/* Utility class for sections that need to avoid sticky header overlap */
+.avoid-header-overlap {
+  scroll-margin-top: 180px;
+  padding-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .avoid-header-overlap {
+    scroll-margin-top: 160px;
+    padding-top: 0.5rem;
+  }
 }

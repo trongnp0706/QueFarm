@@ -38,14 +38,14 @@ function SupportPage() {
         <div className="bg-white rounded-lg shadow p-6 border border-gray-100">
           <FiMail className="text-brand-green-700 text-3xl mb-3" />
           <h3 className="font-semibold mb-2">Email</h3>
-          <p className="text-sm text-brand-brown-600">support@quefarm.vn</p>
+          <p className="text-sm text-brand-brown-600">quefarmfood@gmail.com</p>
         </div>
       </div>
 
       <div className="space-y-3">
         <FAQItem q="Làm sao để đặt hàng?" a="Chọn sản phẩm, thêm vào giỏ, điền thông tin và xác nhận đơn hàng." />
         <FAQItem q="Thời gian giao hàng?" a="Nội thành 1-2 ngày, tỉnh thành khác 2-5 ngày tùy khu vực." />
-        <FAQItem q="Chính sách đổi trả?" a="Đổi trả trong 7 ngày nếu sản phẩm lỗi do nhà sản xuất hoặc vận chuyển." />
+        <FAQItem q="Chính sách đổi trả?" a="Đổi trả trong 7 ngày nếu sản phẩm lỗi do nhà sản xuất." />
       </div>
     </div>
   </div>

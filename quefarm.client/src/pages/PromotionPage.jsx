@@ -39,7 +39,7 @@ function PromotionPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <PromotionCard title="Miễn phí vận chuyển" desc="Cho đơn từ 699k tại HN & HCM." badge="HOT" />
+        <PromotionCard title="Miễn phí vận chuyển" desc="Cho đơn từ 300k tại HCM." badge="HOT" />
         <PromotionCard title="Combo quà biếu" desc="Tiết kiệm đến 15% khi mua theo set." />
       </div>
     </div>

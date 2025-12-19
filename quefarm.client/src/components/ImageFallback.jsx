@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { Image } from 'antd';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FaImage } from 'react-icons/fa';
 
 // Helper function to resolve image URL - simplified for consistency
@@ -22,39 +21,65 @@ const resolveImageUrl = (src) => {
   return normalizedSrc;
 };
 
-const ImageFallback = ({ src, alt, fallbackSrc = '/images/placeholder.svg', style, width, height, debug = false, className, imgStyle, imgClassName, preview = false, ...props }) => {
-  const [imageError, setImageError] = useState(false);
-  const resolvedSrc = resolveImageUrl(src);
-  const resolvedFallbackSrc = resolveImageUrl(fallbackSrc);
+const ImageFallback = ({
+  src,
+  alt,
+  fallbackSrc = '/images/placeholder.svg',
+  style,
+  width,
+  height,
+  debug = false,
+  className,
+  imgStyle,
+  imgClassName,
+  // Kept for backward compatibility; currently unused (we use native <img>).
+  // eslint-disable-next-line no-unused-vars
+  preview = false,
+  ...props
+}) => {
+  const resolvedSrc = useMemo(() => resolveImageUrl(src), [src]);
+  const resolvedFallbackSrc = useMemo(() => resolveImageUrl(fallbackSrc), [fallbackSrc]);
+
   const [currentSrc, setCurrentSrc] = useState(resolvedSrc);
+  const [imageError, setImageError] = useState(false);
+
+  useEffect(() => {
+    setImageError(false);
+    setCurrentSrc(resolvedSrc);
+  }, [resolvedSrc]);
 
   const handleError = () => {
-    if (!imageError && currentSrc !== resolvedFallbackSrc) {
+    if (!resolvedFallbackSrc) {
       setImageError(true);
+      setCurrentSrc(null);
+      return;
+    }
+
+    // Switch once to fallback; if fallback also fails, show placeholder UI
+    if (currentSrc !== resolvedFallbackSrc) {
       setCurrentSrc(resolvedFallbackSrc);
+    } else {
+      setImageError(true);
+      setCurrentSrc(null);
     }
   };
 
-  const handleLoad = () => {
-    if (imageError && currentSrc === resolvedSrc) {
-      setImageError(false);
-    }
+  const mergedImgStyle = {
+    ...(style || {}),
+    ...(imgStyle || {}),
+    ...(width !== undefined ? { width } : {}),
+    ...(height !== undefined ? { height } : {}),
   };
 
-  // Reset error state when src prop changes
-  React.useEffect(() => {
-    const newResolvedSrc = resolveImageUrl(src);
-    if (newResolvedSrc !== currentSrc && !imageError) {
-      setCurrentSrc(newResolvedSrc);
-    }
-  }, [src, currentSrc, imageError, debug]);
+  const mergedImgClassName = [className, imgClassName].filter(Boolean).join(' ');
 
-  // If image failed to load, show custom placeholder
+  // If image failed to load (or no src), show custom placeholder
   if (imageError || !currentSrc) {
     return (
       <div
-        className={`product-image-placeholder ${className || ''}`}
-        style={{ width: width, height: height, ...style }}
+        className={`product-image-placeholder ${mergedImgClassName || ''}`}
+        style={mergedImgStyle}
+        data-debug={debug ? 'image-fallback' : undefined}
       >
         <div className="text-center">
           <FaImage className="mx-auto mb-2 text-4xl text-gray-400" />
@@ -65,21 +90,14 @@ const ImageFallback = ({ src, alt, fallbackSrc = '/images/placeholder.svg', styl
   }
 
   return (
-    <Image
-      src={currentSrc || resolvedFallbackSrc}
+    <img
+      src={currentSrc}
       alt={alt}
-      style={{
-        ...style,
-        width: width,
-        height: height
-      }}
+      className={mergedImgClassName}
+      style={mergedImgStyle}
       onError={handleError}
-      onLoad={handleLoad}
-      fallback={resolvedFallbackSrc}
-      preview={preview}
-      className={className}
-      imgStyle={imgStyle}
-      imgClassName={imgClassName}
+      loading="lazy"
+      decoding="async"
       {...props}
     />
   );

@@ -65,15 +65,48 @@ namespace QueFarm.Server.Application.Services
 
             response.Subtotal = response.Items.Sum(i => i.LineTotal);
 
-            // Voucher demo: 10% off with code SAVE10
-            if (!string.IsNullOrWhiteSpace(request.VoucherCode) && request.VoucherCode.Equals("SAVE10", StringComparison.OrdinalIgnoreCase))
+            // Voucher demo:
+            // - SAVE10: 10% off
+            // - FREESHIP: miễn phí vận chuyển
+            var voucherRaw = request.VoucherCode?.Trim();
+            var codes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (!string.IsNullOrWhiteSpace(voucherRaw))
             {
-                response.DiscountTotal = Math.Round(response.Subtotal * 0.10m, 2);
-                response.Message = "Áp dụng mã SAVE10: giảm 10%";
+                foreach (var c in voucherRaw.Split(new[] { ',', ';', '+', ' ' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                {
+                    codes.Add(c);
+                }
             }
 
-            // Shipping demo: free over 300k, else 30k
-            response.Shipping = response.Subtotal - response.DiscountTotal >= 300_000m ? 0m : 30_000m;
+            var isFreeShip = codes.Contains("FREESHIP");
+            var hasSave10 = codes.Contains("SAVE10");
+
+            var messageParts = new List<string>(2);
+
+            if (hasSave10)
+            {
+                response.DiscountTotal = Math.Round(response.Subtotal * 0.10m, 2);
+                messageParts.Add("SAVE10: giảm 10%");
+            }
+
+            if (isFreeShip)
+            {
+                messageParts.Add("FREESHIP: miễn phí vận chuyển");
+            }
+
+            if (messageParts.Count > 0)
+            {
+                response.Message = "Áp dụng " + string.Join(", ", messageParts);
+            }
+            else if (!string.IsNullOrWhiteSpace(voucherRaw))
+            {
+                response.Message = "Mã không hợp lệ";
+            }
+
+            // Shipping demo: free over 300k, else 30k (unless FREESHIP voucher applied)
+            response.Shipping = isFreeShip
+                ? 0m
+                : (response.Subtotal - response.DiscountTotal >= 300_000m ? 0m : 30_000m);
 
             // Tax demo: included VAT 0% explicit for now
             response.Tax = 0m;

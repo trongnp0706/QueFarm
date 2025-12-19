@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { FaFilter, FaSort, FaThLarge, FaList } from 'react-icons/fa';
+import { FaSort, FaThLarge, FaList } from 'react-icons/fa';
 import CategoryMenu from '../category/CategoryMenu';
 import ProductGrid from './ProductGrid';
 import { getAllProducts, getProductsByCategorySlug, searchProducts, generateImageUrl } from '../../services/productService';
@@ -17,7 +17,6 @@ function ProductList() {
   const [error, setError] = useState(null);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
   const [sortBy, setSortBy] = useState('popularity');
-  const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState([0, 1000000]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [categories, setCategories] = useState([]);
@@ -260,100 +259,22 @@ function ProductList() {
   return (
     <>
 
-      <div className="bg-gray-50 min-h-screen products-main-content">
-        <div className="container mx-auto px-4 py-8">
+      <div className="bg-gray-50 min-h-screen products-main-content pt-4 md:pt-8">
+        <div className="container mx-auto px-4 pb-8">
           
 
 
           <div className="flex flex-col lg:flex-row gap-6">
-            {/* Enhanced Sidebar with filters */}
+            {/* Enhanced Sidebar with category menu */}
             <div className="lg:w-1/4">
-              <div className="sticky top-4">
-                            <CategoryMenu 
-              onSelect={handleCategorySelect}
-              activeCategory={selectedCategory}
-              isProductsPage={!categorySlug}
-              className="mb-6"
-              productCount={products.length}
-              searchQuery={query}
-            />
-                
-                <div className="bg-white rounded-lg shadow-sm mb-6 overflow-hidden filter-section">
-                  <div className="bg-gradient-to-r from-green-700 to-green-600 text-white py-4 px-4 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <FaFilter />
-                      <span className="font-bold">BỘ LỌC SẢN PHẨM</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="flex items-center text-sm">
-                        <span className="w-2 h-2 bg-red-400 rounded-full mr-1"></span>
-                        Hot
-                      </div>
-                      <div className="flex items-center text-sm">
-                        <span className="w-2 h-2 bg-yellow-400 rounded-full mr-1"></span>
-                        Mới
-                      </div>
-                    </div>
-                    <button 
-                      className="lg:hidden text-white hover:text-yellow-300 transition-colors px-2 py-1 rounded text-sm"
-                      onClick={() => setShowFilters(!showFilters)}
-                    >
-                      {showFilters ? '−' : '+'}
-                    </button>
-                  </div>
-                  
-                  <div className={`p-4 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-                    <div className="mb-6">
-                      <h4 className="font-semibold mb-3 text-gray-800 flex items-center">
-                        <span className="w-1 h-4 bg-green-600 mr-2 rounded"></span>
-                        Khoảng giá
-                      </h4>
-                      <div className="space-y-3">
-                        <label className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer transition-colors">
-                          <input 
-                            type="radio" 
-                            name="price-range" 
-                            className="mr-3 text-green-600" 
-                            onChange={() => handlePriceRangeChange(0, 50000)}
-                            checked={priceRange[0] === 0 && priceRange[1] === 50000}
-                          />
-                          <span className="text-gray-700">Dưới 50.000₫</span>
-                        </label>
-                        <label className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer transition-colors">
-                          <input 
-                            type="radio" 
-                            name="price-range" 
-                            className="mr-3 text-green-600" 
-                            onChange={() => handlePriceRangeChange(50000, 100000)}
-                            checked={priceRange[0] === 50000 && priceRange[1] === 100000}
-                          />
-                          <span className="text-gray-700">50.000₫ - 100.000₫</span>
-                        </label>
-                        <label className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer transition-colors">
-                          <input 
-                            type="radio" 
-                            name="price-range" 
-                            className="mr-3 text-green-600" 
-                            onChange={() => handlePriceRangeChange(100000, 200000)}
-                            checked={priceRange[0] === 100000 && priceRange[1] === 200000}
-                          />
-                          <span className="text-gray-700">100.000₫ - 200.000₫</span>
-                        </label>
-                        <label className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer transition-colors">
-                          <input 
-                            type="radio" 
-                            name="price-range" 
-                            className="mr-3 text-green-600" 
-                            onChange={() => handlePriceRangeChange(0, 1000000)}
-                            checked={priceRange[0] === 0 && priceRange[1] === 1000000}
-                          />
-                          <span className="text-gray-700">Tất cả giá</span>
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <CategoryMenu 
+                onSelect={handleCategorySelect}
+                activeCategory={selectedCategory}
+                isProductsPage={!categorySlug}
+                className="mb-6"
+                productCount={products.length}
+                searchQuery={query}
+              />
             </div>
             
             {/* Enhanced Product listing */}

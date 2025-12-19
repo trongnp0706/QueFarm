@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaLeaf, FaList } from 'react-icons/fa';
+import { FaLeaf, FaList, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import categoryService from '../../services/categoryService';
 
 // SVG icon mẫu cho từng danh mục (có thể thay thế sau)
 function CategoryMenu({ onSelect, activeCategory: propActiveCategory, isProductsPage = false, productCount = 0, searchQuery = '' }) {
   const [categories, setCategories] = useState([]);
   const [activeCategory, setActiveCategory] = useState(propActiveCategory || null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -61,29 +62,38 @@ function CategoryMenu({ onSelect, activeCategory: propActiveCategory, isProducts
   return (
     <div className="bg-white rounded-lg shadow-sm mb-6 overflow-hidden category-menu-container">
       {/* Category Header */}
-      <div className="bg-green-700 text-white py-3 px-4">
+      <div 
+        className="bg-green-700 text-white py-3 px-4 cursor-pointer lg:cursor-default"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <FaList />
             <span className="font-bold text-sm md:text-base">DANH MỤC SẢN PHẨM</span>
           </div>
-          <div className="text-right">
-            <div className="text-xs md:text-sm font-medium">
-              <span className="text-yellow-300">{productCount}</span> 
-              <span className="hidden sm:inline"> sản phẩm</span>
-              <span className="sm:hidden"> sp</span>
-            </div>
-            {searchQuery && (
-              <div className="text-xs text-green-200 mt-1 max-w-24 md:max-w-none truncate">
-                cho: "{searchQuery}"
+          <div className="flex items-center gap-3">
+            <div className="text-right">
+              <div className="text-xs md:text-sm font-medium">
+                <span className="text-yellow-300">{productCount}</span> 
+                <span className="hidden sm:inline"> sản phẩm</span>
+                <span className="sm:hidden"> sp</span>
               </div>
-            )}
+              {searchQuery && (
+                <div className="text-xs text-green-200 mt-1 max-w-24 md:max-w-none truncate">
+                  cho: "{searchQuery}"
+                </div>
+              )}
+            </div>
+            {/* Toggle icon for mobile */}
+            <div className="lg:hidden">
+              {isExpanded ? <FaChevronUp /> : <FaChevronDown />}
+            </div>
           </div>
         </div>
       </div>
       
-      {/* Category List */}
-      <ul className="divide-y divide-gray-200">
+      {/* Category List - Collapsible on mobile, always visible on desktop */}
+      <ul className={`divide-y divide-gray-200 transition-all duration-300 ${isExpanded ? 'block' : 'hidden'} lg:block`}>
         {/* All products option for products page */}
         {isProductsPage && (
           <li>

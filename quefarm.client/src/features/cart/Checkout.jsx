@@ -9,13 +9,19 @@ function Checkout() {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
-  const [voucher, setVoucher] = useState('');
+  const [voucher, setVoucher] = useState(''); 
+  const [appliedVouchers, setAppliedVouchers] = useState([]); // applied codes (UPPERCASE)
   const [pricing, setPricing] = useState(null);
   const [pricingLoading, setPricingLoading] = useState(false);
   const [showItems, setShowItems] = useState(true);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const voucherCodeForApi = useMemo(
+    () => (appliedVouchers.length ? appliedVouchers.join(',') : ''),
+    [appliedVouchers]
+  );
 
   useEffect(() => {
     const priceCart = async () => {
@@ -30,7 +36,7 @@ function Checkout() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             items: cart.map(item => ({ productId: item.id, quantity: item.quantity })),
-            voucherCode: voucher || undefined,
+            voucherCode: voucherCodeForApi || undefined,
           })
         });
         if (!res.ok) throw new Error(`Không thể định giá giỏ hàng (${res.status})`);
@@ -38,14 +44,14 @@ function Checkout() {
         const data = ct.includes('application/json') ? await res.json().catch(()=> null) : null;
         if (!data) throw new Error('Phản hồi không hợp lệ từ server');
         setPricing(data);
-      } catch (e) {
+      } catch {
         setPricing(null);
       } finally {
         setPricingLoading(false);
       }
     };
     priceCart();
-  }, [cart, voucher]);
+  }, [cart, voucherCodeForApi]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -60,7 +66,7 @@ function Checkout() {
           phone,
           email: email || undefined,
           address,
-          voucherCode: voucher || undefined,
+          voucherCode: voucherCodeForApi || undefined,
           orderItems: cart.map(item => ({
             productId: item.id,
             quantity: item.quantity
@@ -81,6 +87,26 @@ function Checkout() {
   };
 
   const isCartEmpty = !cart || cart.length === 0;
+
+  const parseVoucherCodes = (raw) =>
+    String(raw || '')
+      .trim()
+      .split(/[,+;\s]+/g)
+      .map((s) => s.trim().toUpperCase())
+      .filter(Boolean);
+
+  const applyVoucher = () => {
+    const codes = parseVoucherCodes(voucher);
+    if (!codes.length) return;
+    setAppliedVouchers((prev) => Array.from(new Set([...prev, ...codes])));
+    setVoucher(''); // clear input after apply
+  };
+
+  const removeVoucher = (code) => {
+    const c = String(code || '').toUpperCase();
+    setAppliedVouchers((prev) => prev.filter((v) => v !== c));
+  };
+  const clearAllVouchers = () => setAppliedVouchers([]);
   const itemsToShow = useMemo(() => (
     pricing?.items?.length
       ? pricing.items
@@ -151,9 +177,46 @@ function Checkout() {
               <h2 className="font-semibold">Mã giảm giá</h2>
             </div>
             <div className="flex gap-2">
-              <input value={voucher} onChange={e => setVoucher(e.target.value)} placeholder="Ví dụ: SAVE10" className="flex-1 border px-3 py-2 rounded" />
-              <button type="button" onClick={() => setVoucher(voucher.trim())} className="px-4 py-2 bg-gray-800 text-white rounded">Áp dụng</button>
+              <input
+                value={voucher}
+                onChange={e => setVoucher(e.target.value)}
+                placeholder="Nhập mã"
+                className="flex-1 border px-3 py-2 rounded"
+              />
+              <button
+                type="button"
+                onClick={applyVoucher}
+                disabled={pricingLoading || !voucher.trim()}
+                className="px-4 py-2 bg-gray-800 text-white rounded disabled:opacity-50"
+              >
+                Áp dụng
+              </button>
             </div>
+            {appliedVouchers.length > 0 && (
+              <div className="mt-2 text-sm">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-gray-700">
+                    Đang áp dụng: <span className="font-semibold">{appliedVouchers.join(', ')}</span>
+                  </span>
+                  <button type="button" onClick={clearAllVouchers} className="text-red-600 hover:text-red-700">
+                    Xóa tất cả
+                  </button>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {appliedVouchers.map((code) => (
+                    <button
+                      key={code}
+                      type="button"
+                      onClick={() => removeVoucher(code)}
+                      className="px-2 py-1 rounded-full border text-xs text-gray-700 hover:bg-gray-50"
+                      title="Bấm để xóa mã này"
+                    >
+                      {code} ×
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="mt-2 text-sm">
               {pricingLoading && <span className="text-gray-500">Đang áp dụng mã...</span>}
               {!pricingLoading && pricing?.message && <span className="text-green-600">{pricing.message}</span>}

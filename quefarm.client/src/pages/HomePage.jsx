@@ -236,7 +236,7 @@ function HomePage() {
         <ProductSection 
           title="ĐẶC SẢN VÙNG MIỀN" 
           products={regionalProducts} 
-          viewAllLink="/products/regions"
+          viewAllLink="/products"
           loading={loading && regionalProducts.length === 0}
         />
         <NewsSection news={mockNews} />

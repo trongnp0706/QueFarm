@@ -115,20 +115,30 @@ function ProductDetail() {
       }
       try {
         const products = await getProductsByCategory(product.categoryId);
+        
         const processed = (products || [])
-          .filter(p => (p.id || p.productId) !== product.id)
+          .filter(p => (p.id || p.productId || p.Id) !== product.id)
           .map(p => {
-            const idValue = p.id || p.productId;
-            const mainImage = (p.productImages && p.productImages[0]?.imageUrl) || p.imageUrl;
+            const idValue = p.id || p.productId || p.Id;
+            // Prefer main image, otherwise fall back to first additional image (API may return only AdditionalImages)
+            const mainImage =
+              p.imageUrl ||
+              p.ImageUrl ||
+              p.additionalImages?.[0] ||
+              p.AdditionalImages?.[0] ||
+              p.productImages?.[0]?.imageUrl ||
+              p.ProductImages?.[0]?.imageUrl;
+
             return {
               ...p,
               id: idValue,
               imageUrl: generateImageUrl(mainImage),
-              price: p.price || 0,
-              name: p.name || 'Sản phẩm'
+              price: p.price ?? p.Price ?? 0,
+              name: p.name || p.Name || 'Sản phẩm'
             };
           })
           .slice(0, 8);
+        
         setRelatedProducts(processed);
       } catch (err) {
         console.error('Error loading related products', err);
@@ -371,14 +381,11 @@ function ProductDetail() {
               {relatedProducts.map((item) => (
                 <Link key={item.id} to={`/product/${item.id}`} className="group bg-white border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition block">
                   <div className="p-3">
-                    <div className="relative w-full rounded-md overflow-hidden bg-gray-50">
-                      <div className="pt-[100%]"></div>
+                    <div className="relative w-full rounded-md overflow-hidden bg-gray-50" style={{ paddingTop: '100%' }}>
                       <ImageFallback
                         src={item.imageUrl}
                         alt={item.name}
-                        className="absolute inset-0"
-                        style={{ width: '100%', height: '100%' }}
-                        imgStyle={{ objectFit: 'cover' }}
+                        className="absolute inset-0 w-full h-full object-cover"
                         fallbackSrc="/images/placeholder.svg"
                       />
                     </div>
