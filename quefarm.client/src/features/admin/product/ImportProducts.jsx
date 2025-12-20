@@ -240,13 +240,23 @@ const ImportProducts = () => {
   };
 
   // Handle file selection
-  const handleFileSelect = (info) => {
-    const { file } = info;
-    
-    console.log('handleFileSelect called with:', info); // Debug log
+  const handleFileSelect = (fileOrInfo) => {
+    // Handle both cases: direct file from beforeUpload and wrapped object from onRemove
+    let file;
+
+    // Check if this is a wrapped object with file property (manual call from onRemove)
+    if (fileOrInfo && typeof fileOrInfo === 'object' && 'file' in fileOrInfo) {
+      file = fileOrInfo.file;
+    } else {
+      // Direct file object from beforeUpload
+      file = fileOrInfo;
+    }
+
+    console.log('handleFileSelect called with:', fileOrInfo); // Debug log
     console.log('File selected:', file); // Debug log
-    
-    if (file.status === 'removed') {
+
+    // Handle file removal
+    if (file?.status === 'removed') {
       setSelectedFile(null);
       setCurrentStep(0);
       setImportResult(null);
@@ -256,12 +266,12 @@ const ImportProducts = () => {
 
     // Validate file type
     const isExcel = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-                    file.type === 'application/vnd.ms-excel' ||
-                    file.name.endsWith('.xlsx') ||
-                    file.name.endsWith('.xls');
-    
+      file.type === 'application/vnd.ms-excel' ||
+      file.name.endsWith('.xlsx') ||
+      file.name.endsWith('.xls');
+
     console.log('File type:', file.type, 'Is Excel:', isExcel); // Debug log
-    
+
     if (!isExcel) {
       message.error(`Chỉ hỗ trợ file Excel (.xlsx, .xls). File type: ${file.type}`);
       return false;
